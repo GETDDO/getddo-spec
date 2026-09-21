@@ -42,3 +42,7 @@
 
 - [2026-09-17 핵심 기능 용어 통일 및 확정 표현 반영](2026-09-17-requirements-refinement.md)
 - [2026-09-21 출석·미션·게임 도메인 규칙 정립](2026-09-21-reward-domain-rules.md)
+
+- [2026-09-21 서비스 공통 미션 및 반복 달성 최신화](2026-09-21-common-repeatable-missions.md)
+
+- [2026-09-21 미결정 사항 순차 확정](2026-09-21-pending-decisions.md)
