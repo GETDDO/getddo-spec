@@ -41,4 +41,4 @@
 ## 기록 목록
 
 - [2026-09-17 핵심 기능 용어 통일 및 확정 표현 반영](2026-09-17-requirements-refinement.md)
-- [2026-09-21 미션·게임 도메인 규칙 정립](2026-09-21-mission-game-domain-rules.md)
+- [2026-09-21 출석·미션·게임 도메인 규칙 정립](2026-09-21-reward-domain-rules.md)

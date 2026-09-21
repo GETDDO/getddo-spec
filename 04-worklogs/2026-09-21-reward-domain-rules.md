@@ -1,4 +1,4 @@
-# 작업 기록: 미션·게임 도메인 규칙 정립
+# 작업 기록: 출석·미션·게임 도메인 규칙 정립
 
 - 작성일: 2026-09-21
 - 관련 이슈 / PR: PR 생성 예정
@@ -11,31 +11,32 @@
 
 ## 한 일
 
-- `02-domain/mission.md`를 신설해 기본 출석, 일회성 미션, 설문, 브랜드 퀴즈, 월별 반복 미션, 보상 지급 공통 규칙을 작성했다.
+- `02-domain/attendance.md`를 신설해 기본 출석과 연속 출석, 보상 지급 공통 규칙을 작성했다.
+- `02-domain/mission.md`를 신설해 일회성 미션, 설문, 브랜드 퀴즈, 보상 지급 공통 규칙을 작성했다.
 - `02-domain/game.md`를 신설해 게임 제공, 결과 판정, 점수 기록, 보상 지급 규칙을 작성했다.
-- `00-requirements/functional-requirements.md`의 3절을 '일회성 미션'에서 '미션'으로 바꾸고 일회성 미션과 월별 반복 미션으로 나눴다. 연속 출석을 일회성 미션 표에서 월별 반복 미션 표로 옮겼다.
-- 같은 문서의 2절·3절·4절 끝에 도메인 규칙 위임 문장을 추가했다. 5절·6절·9절·12절에는 이미 있던 형식을 따랐다.
+- `00-requirements/functional-requirements.md`의 2절을 '기본 출석'에서 '출석'으로 바꾸고 기본 출석과 연속 출석으로 나눴다. 연속 출석을 3절의 일회성 미션 표에서 2절로 옮겼다.
+- 같은 문서의 2절·3절·4절 끝에 도메인 규칙 위임 문장을 추가했다. 5절·6절·9절·12절에 있던 형식을 따랐다.
 - 브랜드 퀴즈의 달성 조건을 '참여 또는 정답 달성'에서 정답 확인으로 확정했다.
 - 게임 보상 조건을 유효 플레이 기준으로 확정하고 차등 지급을 하지 않음을 명시했다.
-- `00-requirements/scope.md`의 보류된 주간 미션 표에서 연속 출석을 제거하고, 월별 반복 미션은 보류 대상이 아님을 기록했다.
-- `00-requirements/pending-decisions.md`에서 해소된 항목을 정리하고 절 이름을 '일회성 미션'에서 '미션'으로 변경했다.
-- `02-domain/README.md`의 관리 범위와 문서 목록에 두 문서를 추가했다.
-- `02-domain/ticket.md`의 지급 항목에서 미션·게임 판정 기준을 두 문서로 연결했다.
-- 결정 근거는 [ADR-005](../03-decisions/005-mission-game-reward-rules.md)로 분리했다.
+- `00-requirements/scope.md`의 보류된 주간 미션 표에서 연속 출석을 제거하고, 연속 출석은 출석 기능의 일부로 구현 범위에 포함됨을 기록했다.
+- `00-requirements/pending-decisions.md`에서 해소된 항목을 정리하고 '출석' 절을 추가했다.
+- `02-domain/README.md`의 관리 범위와 문서 목록에 세 문서를 추가했다.
+- `02-domain/ticket.md`의 지급 항목에서 출석·미션·게임 판정 기준을 각 문서로 연결했다.
+- 결정 근거는 [ADR-005](../03-decisions/005-reward-domain-separation.md)로 분리했다.
 
 ## 확인된 내용
 
 - `02-domain/`에는 `glossary` `event` `ticket` `entry` `drawing` `notification` 여섯 문서만 있었고 출석·미션·게임 문서가 없었다. `02-domain/README.md`의 관리 범위와 문서 목록에도 빠져 있었다.
 - 기능 요구사항 3절의 '사용자당 이벤트 기간 중 1회만 달성할 수 있는 미션'이라는 정의와 매월 반복 달성하는 연속 출석이 충돌했다.
-- `scope.md`에서 보류한 주간 미션 표에 연속 출석이 포함돼 있어, 확정된 월별 연속 출석과 범위가 겹쳤다.
+- `scope.md`에서 보류한 주간 미션 표에 연속 출석이 포함돼 있어, 확정된 연속 출석과 범위가 겹쳤다.
 - 기존 도메인 문서는 모두 2단계 제목만 사용하고 서술형 문장으로 규칙을 작성하며, 마지막에 미결정 사항을 연결한다. 신설 문서도 같은 형식을 따랐다.
 
 ## 해소한 미결정 사항
 
 - 장기 연속 출석의 실제 적용 일수 → 7일·14일·28일로 확정.
 - 출석 누락 시 연속 출석 처리 방식 → 연속 출석 일수를 0으로 되돌린다.
-- 기준 기간보다 긴 연속 출석 일수를 가진 미션의 등록 허용 여부 → 28일을 초과하는 단계는 등록하지 않는다.
-- 브랜드 퀴즈의 달성 판정 기준 → 정답인 경우에만 달성으로 인정한다.
+- 기준 기간보다 긴 연속 출석 일수를 가진 미션의 등록 허용 여부 → 28일을 초과하는 단계는 두지 않는다.
+- 브랜드 퀴즈의 달성 판정 기준 → 정답인 경우에만 완료로 인정한다.
 - 보상 획득에 필요한 게임 플레이 횟수·점수 조건 → 유효로 판정한 플레이가 한 번 이상 있으면 지급한다.
 
 ## 다음 할 일
@@ -55,6 +56,6 @@
 
 ## 반영 결과
 
-- 변경한 명세: `02-domain/mission.md`(신설), `02-domain/game.md`(신설), `02-domain/README.md`, `02-domain/ticket.md`, `00-requirements/functional-requirements.md`, `00-requirements/scope.md`, `00-requirements/pending-decisions.md`
-- 관련 ADR: [ADR-005](../03-decisions/005-mission-game-reward-rules.md)
+- 변경한 명세: `02-domain/attendance.md`(신설), `02-domain/mission.md`(신설), `02-domain/game.md`(신설), `02-domain/README.md`, `02-domain/ticket.md`, `00-requirements/functional-requirements.md`, `00-requirements/scope.md`, `00-requirements/pending-decisions.md`
+- 관련 ADR: [ADR-005](../03-decisions/005-reward-domain-separation.md)
 - 관련 PR: 생성 예정
