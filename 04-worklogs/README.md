@@ -40,6 +40,13 @@
 
 ## 기록 목록
 
+- [2026-09-22 서버 UTC·사용자 및 관리자 화면 KST 기준 명시](2026-09-22-timezone-display.md)
+
+- [2026-09-22 응모권 최대 5장 사용 상한 반영](2026-09-22-five-ticket-entry-limit.md)
+
+- [2026-09-22 응모 마감 후 5분 자동 발표 요구사항 변경](2026-09-22-five-minute-auto-publication.md)
+
+- [2026-09-21 이벤트 삭제 시 연결 배너 처리 확정](2026-09-21-event-banner-deletion.md)
 - [2026-09-17 핵심 기능 용어 통일 및 확정 표현 반영](2026-09-17-requirements-refinement.md)
 - [2026-09-21 출석·미션·게임 도메인 규칙 정립](2026-09-21-reward-domain-rules.md)
 
