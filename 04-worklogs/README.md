@@ -40,6 +40,10 @@
 
 ## 기록 목록
 
+- [2026-09-23 이벤트 등록·경품 구성·수정 제한 반영](2026-09-23-event-registration-and-editing.md)
+
+- [2026-09-23 이벤트 일정 변경·삭제 알림 정책 반영](2026-09-23-event-notification-policy.md)
+
 - [2026-09-22 서버 UTC·사용자 및 관리자 화면 KST 기준 명시](2026-09-22-timezone-display.md)
 
 - [2026-09-22 응모권 최대 5장 사용 상한 반영](2026-09-22-five-ticket-entry-limit.md)

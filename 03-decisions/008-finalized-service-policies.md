@@ -1,6 +1,7 @@
 # ADR-008: 순차 질의로 확정한 서비스 정책 일괄 반영
 
 - 상태: 부분 대체 — 최초 추첨·발표 시점은 [ADR-009](009-five-minute-auto-publication.md)로 변경. 일일·월간 시간 기준은 [KST 자정 기준](../00-requirements/functional-requirements.md#공통-시간-기준과-화면-표시)으로 변경. 그 외 정책은 유지
+- 후속 변경: 일정 변경 알림 중 시작 시각을 앞당기는 경우의 추가 안내는 [ADR-011](011-event-notification-changes-and-deletion.md)을 거쳐 [ADR-012](012-event-registration-and-editing-rules.md)의 앞당김 금지로 대체했다. 아래 표는 당시 결정 기록이다.
 - 작성자 / 날짜: 사용자 최종 답변에 따라 Codex 정리 / 2026-09-21
 - 관련 작업 기록: [미결정 사항 순차 확정](../04-worklogs/2026-09-21-pending-decisions.md)
 - 대체 범위: ADR-006의 미션 재달성·반복 주기·문항 버전 방식, ADR-007과 ADR-003의 후속 반환 방식, ADR-005의 고정 출석 수치 해석을 부분 대체한다. 이전 기록은 당시 결정을 보존한다.

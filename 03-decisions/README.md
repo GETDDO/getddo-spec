@@ -2,6 +2,10 @@
 
 프론트엔드와 백엔드 모두에 영향을 주는 중요한 결정과 그 이유를 ADR로 기록합니다.
 
+- [ADR-012: 이벤트·경품 동시 등록과 이벤트 수정 제한](012-event-registration-and-editing-rules.md)
+
+- [ADR-011: 일정 앞당김의 추가 알림 제외 및 이벤트 삭제 시 알림 제거](011-event-notification-changes-and-deletion.md) — ADR-012로 대체됨
+
 - [ADR-010: 일반 가중치 적용 이벤트의 응모권 사용 상한 5장](010-five-ticket-entry-limit.md)
 
 - [ADR-009: 응모 마감 후 5분 검토 및 자동 최초 발표](009-five-minute-auto-publication.md)
