@@ -34,6 +34,10 @@ getddo-spec/
 ├── 04-worklogs/
 │   ├── README.md
 │   └── 2026-09-17-requirements-refinement.md
+├── 05-api/
+│   ├── README.md
+│   ├── common.md
+│   └── [도메인별 API 파일]
 └── templates/
     ├── adr.md
     └── worklog.md
@@ -58,6 +62,10 @@ getddo-spec/
 ### `04-worklogs`
 
 공용 명세를 검토하고 정리한 과정, 확인된 내용과 다음 할 일을 작업별로 기록합니다. 작업 기록은 진행 맥락을 보존하기 위한 문서이며 확정된 요구사항이나 도메인 정책을 대신하지 않습니다.
+
+### `05-api`
+
+프론트엔드와 백엔드가 함께 검토할 [API 계약 초안](05-api/README.md)을 도메인별로 관리합니다. 확정된 요구사항과 도메인 규칙을 우선하며, DB와 내부 구현 설계는 코드 저장소에서 관리합니다.
 
 ### `templates`
 

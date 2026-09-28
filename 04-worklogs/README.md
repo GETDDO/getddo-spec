@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-09-28 API 초안 도메인별 분리](2026-09-28-api-spec-split.md)
+
 - [2026-09-23 이벤트 등록·경품 구성·수정 제한 반영](2026-09-23-event-registration-and-editing.md)
 
 - [2026-09-23 이벤트 일정 변경·삭제 알림 정책 반영](2026-09-23-event-notification-policy.md)
