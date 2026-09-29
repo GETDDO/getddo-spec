@@ -22,13 +22,13 @@
 - `prizes:PublishedPrize[]`; `PublishedPrize`는 `prizeId:UUID`, `rank:int`, `name:string`, `winnerCount:int`, `unfilledCount:int`, `winners:MaskedWinner[]`
 - `MaskedWinner`: `maskedName:string`, `maskedPhoneNum:string?`, `maskedEmail:string?`. 원본 개인정보·사용자 ID·후보 가중치·검토 사유를 포함하지 않는다. 세부 마스킹 규칙은 담당자 계약에 따른다.
 
-발표 전에는 `isPublished=false`, `publishedAt=null`, `revision=null`, `updatedAt=null`, `prizes=[]`다. 예정 시각이 지났다는 사실만으로 결과를 공개하지 않는다. 정상 최초 발표는 마감 + 5분에 서버가 수행한다. 장애 시 안내·복구 정책은 발표 실패 처리 계약이며, 준비 실패를 낙첨이나 대상 없음으로 위장하지 않는다.
+발표 전에는 `isPublished=false`, `publishedAt=null`, `revision=null`, `updatedAt=null`, `prizes=[]`다. 예정 시각이 지났다는 사실만으로 결과를 공개하지 않는다. 정상 최초 발표는 마감 + 5분에 서버가 수행한다. `displayStatus=WAITING`이고 서버 기준 예정 시각이 지났는데 발표가 지연되면 비공개 필드를 유지하며 화면에 “결과 확인 중”을 표시한다. 원인 복구 후 확정된 결과를 자동 공개하고, 실패만으로 자동 취소하지 않는다. 준비 실패를 낙첨이나 대상 없음으로 위장하지 않는다.
 
 공개된 `prizes`는 등수 내림차순으로 전달해 하위 등수부터 연출할 수 있게 제안한다. 실제 선정은 상위 등수부터 진행한다. 후보 부족은 `unfilledCount`로 표현한다. 재추첨 중에도 관리자 미확인 결과를 노출하지 않는다. 기존 공개 명단 중 당첨 취소자의 임시 표시 방식은 담당자 계약에 따른다.
 
 `MyResult`: `eventId:UUID`, `result:NOT_ENTERED/PENDING/WON/LOST/EXCLUDED/CANCELED`, `prize:Prize?`, `exclusionReason:string?`, `isPublished:boolean`, `revision:int?`, `serverTime:instant`.
 
-`result`는 API 전용 제안 값이다. 본인 제외는 일반 낙첨과 구분한다. 공개 전 당첨 여부는 `PENDING`, `prize=null`로 유지한다. 제외 사유는 본인에게만 공개 가능한 문구로 제공한다. 당첨 취소·재추첨 후 본인 표시의 중간 상태 역시 담당자 계약을 따른다.
+`result`는 API 전용 제안 값이다. 본인 제외는 일반 낙첨과 구분한다. 공개 전과 발표 지연 중 당첨 여부는 `PENDING`, `prize=null`로 유지한다. `result=PENDING`이고 서버 기준 발표 예정 시각이 지났는데 `isPublished=false`이면 화면에 “결과 확인 중”을 표시한다. 제외 사유는 본인에게만 공개 가능한 문구로 제공한다. 당첨 취소·재추첨 후 본인 표시의 중간 상태 역시 담당자 계약을 따른다.
 
 ## 관리자 추첨·공개 명단
 
