@@ -2,6 +2,8 @@
 
 프론트엔드와 백엔드 모두에 영향을 주는 중요한 결정과 그 이유를 ADR로 기록합니다.
 
+- [ADR-013: 추첨 가중치의 선형 환산과 별도 상한·배율 없음](013-linear-drawing-weight.md)
+
 - [ADR-012: 이벤트·경품 동시 등록과 이벤트 수정 제한](012-event-registration-and-editing-rules.md)
 
 - [ADR-011: 일정 앞당김의 추가 알림 제외 및 이벤트 삭제 시 알림 제거](011-event-notification-changes-and-deletion.md) — ADR-012로 대체됨
