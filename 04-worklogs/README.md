@@ -40,6 +40,7 @@
 
 ## 기록 목록
 
+- [2026-09-29 Jira 에픽·태스크 템플릿 추가](2026-09-29-jira-templates.md)
 - [2026-09-28 API 초안 도메인별 분리](2026-09-28-api-spec-split.md)
 
 - [2026-09-23 이벤트 등록·경품 구성·수정 제한 반영](2026-09-23-event-registration-and-editing.md)

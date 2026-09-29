@@ -40,6 +40,8 @@ getddo-spec/
 │   └── [도메인별 API 파일]
 └── templates/
     ├── adr.md
+    ├── jira-epic.md
+    ├── jira-task.md
     └── worklog.md
 ```
 
@@ -69,7 +71,7 @@ getddo-spec/
 
 ### `templates`
 
-공용 결정 기록과 작업 기록에 사용하는 문서 양식을 관리합니다.
+공용 결정 기록과 작업 기록, Jira 이슈에 사용하는 문서 양식을 관리합니다. Jira 이슈는 [에픽](templates/jira-epic.md)과 [태스크](templates/jira-task.md) 양식을 사용합니다.
 
 ## 관리 원칙
 
