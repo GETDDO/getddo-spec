@@ -31,13 +31,13 @@ AT02는 날짜나 보상량을 입력받지 않는다. 서버 KST 업무일로 �
 | ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
 | --- | --- | --- | --- | --- |
 | AP01 | `GET /admin/policies/attendance/daily` | `page,size` | 200 `Page<DailyAttendancePolicy>` | 공통 |
-| AP02 | `POST /admin/policies/attendance/daily` | 필수 `rewardTicketCount:int` | 201 `DailyAttendancePolicy` | 409 적용일 중복, 보상 수량·예약 정책 계약 |
+| AP02 | `POST /admin/policies/attendance/daily` | 필수 `rewardTicketCount:int(≥1)` | 201 `DailyAttendancePolicy` | 400 수량 오류, 409 적용일 중복; 최대값·예약 정책 재수정은 보상 수량·예약 정책 계약 |
 | AP03 | `GET /admin/policies/attendance/streak` | `page,size` | 200 `Page<StreakPolicySet>` | 공통 |
 | AP04 | `POST /admin/policies/attendance/streak` | 필수 `milestones:MilestoneWrite[]` | 201 `StreakPolicySet` | 400 단계 오류, 409 적용월 중복 |
 
 `DailyAttendancePolicy`: `id:UUID`, `rewardTicketCount:int`, `effectiveFrom:instant`, `effectiveUntil:instant?`, `createdBy:UUID`, `createdAt:instant`.
 
-`MilestoneWrite`: `milestoneDays:int(1~28)`, `rewardTicketCount:int(≥0)`. 배열은 단계 일수 오름차순이고 중복이 없어야 한다. `StreakPolicySet`: `id:UUID`, `effectiveMonth:month`, `milestones:{id:UUID,milestoneDays:int,rewardTicketCount:int}[]`, `createdBy:UUID`, `createdAt:instant`.
+`MilestoneWrite`: `milestoneDays:int(1~28)`, `rewardTicketCount:int(≥1)`. 배열은 단계 일수 오름차순이고 중복이 없어야 한다. `StreakPolicySet`: `id:UUID`, `effectiveMonth:month`, `milestones:{id:UUID,milestoneDays:int,rewardTicketCount:int}[]`, `createdBy:UUID`, `createdAt:instant`.
 
 일일 정책의 적용 시각은 다음 KST 자정, 연속 정책은 다음 KST 월초를 서버가 계산한다. 사용자가 과거 적용일을 지정하지 못한다. 같은 적용일/월의 예약 정책 재수정 방식은 **보상 수량·예약 정책 계약**이며 이 초안은 중복 생성 충돌을 제안한다. 현재 월의 판정·기존 보상 기록은 유지한다. 보상 1장 고정인 게임에 임의 수량 변경 API를 만들지 않는다.
 

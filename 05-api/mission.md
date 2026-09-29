@@ -55,9 +55,9 @@
 | --- | --- | --- | --- | --- |
 | AM01 | `GET /admin/missions` | `page,size,missionType,status,keyword,from,to` | 200 `Page<AdminMission>` | 공통 |
 | AM02 | `GET /admin/missions/{missionId}` | 없음 | 200 `AdminMission` | 공통 |
-| AM03 | `POST /admin/missions` | `MissionWrite` | 201 `AdminMission` | 400 문항·정답·기간 오류 |
+| AM03 | `POST /admin/missions` | `MissionWrite` | 201 `AdminMission` | 400 문항·정답·기간·수량 오류 |
 
-`MissionWrite`: 필수 `title:string(1~200)`, `description:string`, `missionType:SURVEY/QUIZ`, `startsAt:instant`, `endsAt:instant`, `rewardTicketCount:int`, `questions:AdminQuestionWrite[]`; 선택 `imageKey:string/null(≤500)`.
+`MissionWrite`: 필수 `title:string(1~200)`, `description:string`, `missionType:SURVEY/QUIZ`, `startsAt:instant`, `endsAt:instant`, `rewardTicketCount:int(≥1)`, `questions:AdminQuestionWrite[]`; 선택 `imageKey:string/null(≤500)`.
 
 `AdminQuestionWrite`: 필수 `questionType`, `questionText:string`, `displayOrder:int`; 설문에는 `required:boolean`; 선택형에는 `options:AdminOptionWrite[]`; 단답 퀴즈에는 `correctAnswer:string`. `AdminOptionWrite`: `optionText:string`, `displayOrder:int`, 퀴즈에만 `isCorrect:boolean`.
 
