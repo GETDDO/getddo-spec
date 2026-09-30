@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-09-30 PR 제목의 Jira 이슈 키 형식 정리](2026-09-30-pr-title-jira-key.md)
+
 - [2026-09-30 사용자 알림 N01~N03 API 계약 확정](2026-09-30-notification-api-contract.md)
 
 - [2026-09-29 응모권 보상 수량 하한 확정](2026-09-29-reward-quantity-minimum.md)
