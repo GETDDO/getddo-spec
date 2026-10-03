@@ -40,8 +40,6 @@
 
 ## 기록 목록
 
-- [2026-10-03 ERD 수정 전 API 명세 다각도 검토](2026-10-03-api-review-before-erd.md)
-
 - [2026-09-30 PR 제목의 Jira 이슈 키 형식 정리](2026-09-30-pr-title-jira-key.md)
 
 - [2026-09-30 사용자 알림 N01~N03 API 계약 확정](2026-09-30-notification-api-contract.md)
