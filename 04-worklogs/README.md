@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-06 게임·미션 무작위 등급 응모권 정책 반영](2026-10-06-random-ticket-grades.md)
+
 - [2026-09-30 PR 제목의 Jira 이슈 키 형식 정리](2026-09-30-pr-title-jira-key.md)
 
 - [2026-09-30 사용자 알림 N01~N03 API 계약 확정](2026-09-30-notification-api-contract.md)
