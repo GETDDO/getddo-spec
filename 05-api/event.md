@@ -19,7 +19,7 @@
 | `EventDetail` | EventSummary 전체 + `description:string`, `maxTicketsPerUser:int?`, `prizes:Prize[]` |
 | `Prize` | `id:UUID`, `rank:int`, `name:string`, `description:string?`, `imageUrl:string?`, `winnerCount:int` |
 
-`EventStatus`는 관리자 상태 값 `SCHEDULED`, `OPEN`, `CLOSED`, `DRAW_CONFIRMED`, `PUBLISHED`, `SUSPENDED`, `CANCELED`, `REDRAWING`, `NO_ENTRANTS`, `NO_ELIGIBLE_ENTRANTS`에 대응한다. 관리자에게는 운영 상태를 제공하지만 사용자 목록·상세에서 `REDRAWING`을 그대로 노출하지 않는다. 이미 발표된 이벤트는 공개 상태를 유지하고 최초 발표 전에는 기존 대기 상태로 표현하도록 제안한다. 공개 결과에는 별도 공개 여부를 사용하며 이벤트 상태만으로 당첨 정보를 노출하지 않는다. 구체적인 중간 결과 표시 범위는 [결과 조회](drawing.md#공개-결과와-본인-결과)의 공개 중간 상태를 따른다.
+`EventStatus`의 제안 값은 `SCHEDULED`, `OPEN`, `CLOSED`, `DRAW_CONFIRMED`, `PUBLISHED`, `CANCELED`, `REDRAWING`, `NO_ENTRANTS`, `NO_ELIGIBLE_ENTRANTS`다. 현행 DB의 `SUSPENDED`는 이번 요구사항에서 제외된 상태이므로 API 계약에 포함하지 않는다. 관리자에게는 운영 상태를 제공하지만 사용자 목록·상세에서 `REDRAWING`을 그대로 노출하지 않는다. 이미 발표된 이벤트는 공개 상태를 유지하고 최초 발표 전에는 기존 대기 상태로 표현하도록 제안한다. 공개 결과에는 별도 공개 여부를 사용하며 이벤트 상태만으로 당첨 정보를 노출하지 않는다. 구체적인 중간 결과 표시 범위는 [결과 조회](drawing.md#공개-결과와-본인-결과)의 공개 중간 상태를 따른다.
 
 ## 관리자 이벤트 등록·운영
 
@@ -32,9 +32,9 @@
 | AE03 | `POST /admin/events` | `EventWriteRequest` | 201 `AdminEvent` | 400 기간·경품·조건 오류 |
 | AE04 | `PUT /admin/events/{eventId}` | `EventWriteRequest` | 200 `AdminEvent` | 409 수정 불가 상태·시작 앞당김 |
 | AE05 | `DELETE /admin/events/{eventId}` | 없음 | 200 `null` | 409 시작/응모 이력 존재, 삭제 이벤트의 알림 처리 계약 |
-| AE06 | `POST /admin/events/{eventId}/suspend` | `ReasonRequest` | 200 `EventOperationResult` | 409 허용되지 않은 상태 |
-| AE07 | `POST /admin/events/{eventId}/resume` | `ReasonRequest` | 200 `EventOperationResult` | 409 중단 아님·마감·취소 |
 | AE08 | `POST /admin/events/{eventId}/cancel` | `ReasonRequest` | 200 `EventOperationResult` | 반환 실패 시 성공 금지 |
+
+AE06·AE07은 이벤트 일시 중단·재개 기능 제외에 따라 사용하지 않는다. 기존 AE08 식별자는 유지한다.
 
 ## 이벤트·경품 동시 등록 및 수정
 
@@ -76,9 +76,9 @@ PUT은 수정 가능한 설정 전체를 전달한다. 기존 경품은 ID를 �
 
 월말 소진용 이벤트는 별도 구분 필드 없이 `eventType=TICKET`, `weightingEnabled=true`, `maxTicketsPerUser=null` 조합으로 표현한다. `NO_TICKET`의 `maxTicketsPerUser=null`과는 `eventType`으로 구분한다. 서버는 이벤트 유형·가중치 여부·상한값 조합을 검증한다. 월말 소진용 이벤트의 지정 주체와 허용 조건은 담당자가 정한다.
 
-`AdminEvent`: EventDetail 전체 + `imageKey:string?`, `createdBy:UUID`, `createdAt:instant`, `updatedAt:instant`, `suspendedFromStatus:SCHEDULED/OPEN/null`, `suspendedAt:instant?`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
+`AdminEvent`: EventDetail 전체 + `imageKey:string?`, `createdBy:UUID`, `createdAt:instant`, `updatedAt:instant`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
 
-수정은 시작 전 **SCHEDULED**에서만 허용하고, 현재 설정된 시작 시각보다 앞당길 수 없다. 중단·취소 상태는 시작 전이어도 수정할 수 없다. 진행·마감 후에는 제목·이미지도 수정할 수 없다. 수정 시 시작 알림 예약과 필요한 변경 알림을 연동한다.
+수정은 시작 전 **SCHEDULED**에서만 허용하고, 현재 설정된 시작 시각보다 앞당길 수 없다. 취소 상태는 시작 전이어도 수정할 수 없다. 진행·마감 후에는 제목·이미지도 수정할 수 없다. 수정 시 시작 알림 예약과 필요한 변경 알림을 연동한다.
 
 삭제는 시작 전이고 응모 이력이 없을 때만 가능하다. 배너는 함께 삭제한다. 이미 생성된 알림 전체를 삭제한다는 정책은 최신 ADR에서 철회되었으므로 임의로 삭제하거나 반드시 보존한다고 확정하지 않는다. 삭제 이벤트의 기존 알림 처리 방식은 담당자 계약에 따른다.
 
@@ -88,9 +88,6 @@ PUT은 수정 가능한 설정 전체를 전달한다. 기존 경품은 ID를 �
 
 | 작업 | 처리 계약 |
 | --- | --- |
-| 중단 | SCHEDULED/OPEN은 SUSPENDED, 반환 0. CLOSED에 중단 요청하면 즉시 CANCELED와 반환을 함께 처리 |
-| 재개 | 마감 전 SUSPENDED만 허용. 현재 시각이 시작 전이면 SCHEDULED, 이후면 OPEN. 기존 응모·마감·차감 유지 |
 | 취소 | 상태와 관계없이 허용. 당첨 발표 이후·대상 없는 종료 상태 포함. 취소와 대상 차감분 반환이 함께 완료되어야 200 |
-| 중단 중 마감 | 내부 처리로 취소·반환. 이후 재개 불가 |
 
-AE08을 반환 작업 접수만 한 202로 완료 처리하지 않는다. 실패는 취소/반환 모두 완료된 것으로 응답하지 않고 같은 원본 차감에 중복 반환하지 않는다. AE06~AE08 성공 뒤 반환하는 수량은 해당 운영 처리의 확정 결과로 제안한다.
+AE08을 반환 작업 접수만 한 202로 완료 처리하지 않는다. 실패는 취소/반환 모두 완료된 것으로 응답하지 않고 같은 원본 차감에 중복 반환하지 않는다. 성공 응답의 반환 수량은 취소 처리의 확정 결과로 제안한다.

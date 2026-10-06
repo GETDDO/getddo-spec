@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-06 이벤트 중단·재개 기능 제외](2026-10-06-remove-event-suspension.md)
+
 - [2026-10-06 전민규 게임 담당 범위 정리](2026-10-06-game-ownership-handoff.md)
 - [2026-10-06 게임·미션 무작위 등급 응모권 정책 반영](2026-10-06-random-ticket-grades.md)
 

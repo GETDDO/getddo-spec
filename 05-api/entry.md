@@ -11,7 +11,7 @@
 | ID | 권한 | 메서드·경로 | 요청 | 성공 | 주요 오류 |
 | --- | --- | --- | --- | --- | --- |
 | E03 | U | `GET /events/{eventId}/statistics` | 없음 | 200 `EntryStatistics` | 공통 |
-| E04 | U | `POST /events/{eventId}/entries` | 멱등 헤더, `EntryRequest` | 201 `EntryReceipt`; 접수 성공 건의 동일 요청 200 | 403 자격/관리자, 409 기간·중단·상한·잔액·중복, 429; 거절 건의 동일 요청은 최초 4xx·오류 코드 |
+| E04 | U | `POST /events/{eventId}/entries` | 멱등 헤더, `EntryRequest` | 201 `EntryReceipt`; 접수 성공 건의 동일 요청 200 | 403 자격/관리자, 409 기간·취소·상한·잔액·중복, 429; 거절 건의 동일 요청은 최초 4xx·오류 코드 |
 | E05 | U | `GET /events/{eventId}/entries/me` | `page,size` | 200 `Page<EntryReceipt>` | 공통 |
 | E06 | U | `GET /users/me/entries` | `page,size,eventId,status,from,to` | 200 `Page<EntryReceipt>` | 공통 |
 | E07 | U | `GET /events/{eventId}/eligibility` | 없음 | 200 `EntryEligibility` | 공통 |
