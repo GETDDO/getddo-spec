@@ -40,6 +40,7 @@
 
 ## 기록 목록
 
+- [2026-10-06 전민규 게임 담당 범위 정리](2026-10-06-game-ownership-handoff.md)
 - [2026-10-06 게임·미션 무작위 등급 응모권 정책 반영](2026-10-06-random-ticket-grades.md)
 
 - [2026-09-30 PR 제목의 Jira 이슈 키 형식 정리](2026-09-30-pr-title-jira-key.md)
