@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-07 응모권 회수 기능 제외](2026-10-07-exclude-ticket-recovery.md)
+
 - [2026-10-07 출석 브론즈 응모권 보상 반영](2026-10-07-attendance-bronze-tickets.md)
 
 - [2026-10-06 이벤트 중단·재개 기능 제외](2026-10-06-remove-event-suspension.md)

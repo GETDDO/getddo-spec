@@ -21,7 +21,7 @@
 | `EntryStatistics` | `eventId:UUID`, `participantCount:long`, `totalSpentTicketCount:long`, `mySpentTicketCount:long`, `serverTime:instant` |
 | `EntryEligibility` | `eventId:UUID`, `canEnter:boolean`, `reasons:string[]`, `usedTicketCount:long`, `remainingTicketLimit:long?`, `availableTicketBalance:long`, `serverTime:instant` |
 
-`participantCount`는 접수 완료된 응모자의 중복 제거 수다. 추가 응모 건수나 유효 추첨 후보 수와 다르다. 차감 합계는 접수 완료 건의 차감량이며 반환·회수를 빼서 순사용량으로 바꾸지 않는다. `remainingTicketLimit=null`은 승인된 월말 소진용 이벤트의 수량 상한 없음이다. 잔액과 별개이며 `null`을 잔액 무제한으로 해석하지 않는다. 미사용 이벤트는 수량 관련 값이 0이고 1회 제한은 `canEnter`로 확인한다.
+`participantCount`는 접수 완료된 응모자의 중복 제거 수다. 추가 응모 건수나 유효 추첨 후보 수와 다르다. 차감 합계는 접수 완료 건의 차감량이며 반환을 빼서 순사용량으로 바꾸지 않는다. `remainingTicketLimit=null`은 승인된 월말 소진용 이벤트의 수량 상한 없음이다. 잔액과 별개이며 `null`을 잔액 무제한으로 해석하지 않는다. 미사용 이벤트는 수량 관련 값이 0이고 1회 제한은 `canEnter`로 확인한다.
 
 갱신은 E03 재조회 방식으로 제안한다. 성공 응모 직후 E03·E07·T01을 재조회한다. 폴링 간격은 구현 담당자 설정이며 SSE·WebSocket을 필수 계약으로 추가하지 않는다. 당첨 확률은 반환하지 않는다.
 

@@ -82,8 +82,10 @@
 
 `NotificationJob`: `id:UUID`, `eventId:UUID?`, `publicationId:UUID?`, `targetUserId:UUID?`, `notificationType:NotificationType`, `status:PENDING/PROCESSING/COMPLETED/FAILED`, `attemptCount:int`, `scheduledAt:instant`, `nextAttemptAt:instant?`, `createdAt:instant`, `completedAt:instant?`.
 
-`NotificationType`: `EVENT_START`, `RESULT_PUBLISHED`, `ENTRY_EXCLUDED`, `TICKET_REVOKED`, `EVENT_SCHEDULE_CHANGED`, `EVENT_CANCELED`, `RESULT_CHANGED`.
+`NotificationType`: `EVENT_START`, `RESULT_PUBLISHED`, `ENTRY_EXCLUDED`, `EVENT_SCHEDULE_CHANGED`, `EVENT_CANCELED`, `RESULT_CHANGED`.
 
 `NotificationJobDetail`: NotificationJob 전체 + `lastError:string?`, `sourceJobId:UUID?`, `lastProcessedUserId:UUID?`, `leaseUntil:instant?`. `AdminNotification`: Notification 전체 + `jobId:UUID`, `userId:UUID`, `mockDeliveryStatus:PENDING/SENT/FAILED`, `mockSentAt:instant?`, `deliveryAttemptCount:int`, `nextDeliveryAttemptAt:instant?`, `lastDeliveryError:string?`.
 
 AN03은 생성 작업 실패, AN05는 개별 모의 발송 실패의 재처리다. 재시도로 동일 알림을 복제하거나 읽음 상태를 변경하지 않는다. 최종 실패 여부·허용 재시도 상태의 구체 판정은 담당자의 운영 설정으로 정의한다. 관리자 목록 조회가 타인의 알림 읽음을 대신 처리하지 않는다.
+
+응모권 회수 기능 제외에 따라 신규 TICKET_REVOKED 알림은 생성하지 않는다. 기존 알림의 조회 호환 처리는 담당자가 별도 확인하며 기존 데이터를 삭제하지 않는다.

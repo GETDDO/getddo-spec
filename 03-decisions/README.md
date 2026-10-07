@@ -1,5 +1,7 @@
 # 공용 결정 기록
 
+- [ADR-017: 부정 획득 응모권 회수 기능 제외](017-exclude-ticket-recovery.md) — 제안
+
 - [ADR-016: 기본·연속 출석 보상의 브론즈 응모권 지급](016-attendance-bronze-tickets.md) — 제안
 
 - [ADR-015: 이벤트 일시 중단·재개 제외](015-remove-event-suspension.md)

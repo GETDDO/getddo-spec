@@ -16,7 +16,7 @@
 | [미션](mission.md) | M01~M04, AM01~AM03 | 미션 제출·운영 |
 | [게임](game.md) | G01~G05, AG01~AG03 | 플레이·점수·게임 운영 |
 | [응모권](ticket.md) | T01~T02, AO03~AO05, AO08 | 잔액·이력·운영 정책 |
-| [어뷰징](abuse.md) | AR01~AR07 | 검토·제외·회수·무효화 |
+| [어뷰징](abuse.md) | AR01~AR03·AR06~AR07 (AR04·AR05 제외) | 검토·제외·무효화 |
 | [알림](notification.md) | N01~N03, AN01~AN05 | 사용자 알림·관리자 발송 이력 |
 | [배너](banner.md) | B01, AB01~AB05 | 배너 조회·관리 |
 | [감사](audit.md) | AU01~AU02 | 관리자 감사 조회 |
