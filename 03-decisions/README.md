@@ -1,5 +1,7 @@
 # 공용 결정 기록
 
+- [ADR-016: 기본·연속 출석 보상의 브론즈 응모권 지급](016-attendance-bronze-tickets.md) — 제안
+
 - [ADR-015: 이벤트 일시 중단·재개 제외](015-remove-event-suspension.md)
 
 - [ADR-014: 게임·미션 보상의 무작위 응모권 등급과 등급별 가중치](014-random-ticket-grades.md) — 제안
