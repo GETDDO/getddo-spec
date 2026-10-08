@@ -70,13 +70,13 @@ AE06·AE07은 이벤트 일시 중단·재개 기능 제외에 따라 사용하�
 }
 ```
 
-생성자는 헤더에서 조회하고 초기 상태는 서버가 정한다. 이벤트와 경품은 한 트랜잭션으로 등록한다. 독립적인 경품 생성 후 이벤트 등록을 완료하는 API로 쪼개지 않는다. 한 등수에 한 경품 종류와 별도 당첨 인원을 설정한다.
+등록 요청자의 관리자 권한을 확인하고 초기 상태는 서버가 정한다. 이벤트와 경품은 한 트랜잭션으로 등록한다. 독립적인 경품 생성 후 이벤트 등록을 완료하는 API로 쪼개지 않는다. 한 등수에 한 경품 종류와 별도 당첨 인원을 설정한다.
 
 PUT은 수정 가능한 설정 전체를 전달한다. 기존 경품은 ID를 유지하고 다른 이벤트의 경품 ID는 거절한다. 경품 목록 교체도 이벤트와 함께 원자적으로 처리한다. 경품 개수·등수 상한을 임의로 3등까지로 제한하지 않는다.
 
 월말 소진용 이벤트는 별도 구분 필드 없이 `eventType=TICKET`, `weightingEnabled=true`, `maxTicketsPerUser=null` 조합으로 표현한다. `NO_TICKET`의 `maxTicketsPerUser=null`과는 `eventType`으로 구분한다. 서버는 이벤트 유형·가중치 여부·상한값 조합을 검증한다. 월말 소진용 이벤트의 지정 주체와 허용 조건은 담당자가 정한다.
 
-`AdminEvent`: EventDetail 전체 + `imageKey:string?`, `createdBy:UUID`, `createdAt:instant`, `updatedAt:instant`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
+`AdminEvent`: EventDetail 전체 + `imageKey:string?`, `createdAt:instant`, `updatedAt:instant`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
 
 수정은 시작 전 **SCHEDULED**에서만 허용하고, 현재 설정된 시작 시각보다 앞당길 수 없다. 취소 상태는 시작 전이어도 수정할 수 없다. 진행·마감 후에는 제목·이미지도 수정할 수 없다. 수정 시 시작 알림 예약과 필요한 변경 알림을 연동한다.
 

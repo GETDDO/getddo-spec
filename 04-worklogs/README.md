@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-08 관리자 이벤트 응답의 createdBy 제거](2026-10-08-remove-event-created-by.md)
+
 - [2026-10-07 응모권 회수 기능 제외](2026-10-07-exclude-ticket-recovery.md)
 
 - [2026-10-07 출석 브론즈 응모권 보상 반영](2026-10-07-attendance-bronze-tickets.md)
