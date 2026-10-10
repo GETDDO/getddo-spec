@@ -19,12 +19,24 @@
 | `AttendanceToday` | `attendanceDate:date`, `attended:boolean`, `consecutiveDays:int`, `dailyRewardTicketCount:int`, `milestones:AttendanceMilestone[]`, `nextResetAt:instant`, `serverTime:instant` |
 | `AttendanceMilestone` | `milestoneDays:int`, `rewardTicketCount:int`, `claimed:boolean`, `claimedAt:instant?` |
 | `AttendanceReceipt` | `attendanceId:UUID`, `attendanceDate:date`, `consecutiveDays:int`, `rewards:RewardReceipt[]`, `createdAt:instant` |
-| `RewardReceipt` | `claimId:UUID`, `ticketCount:int`, `grantedAt:instant?`, `expiresAt:instant?` |
+| `RewardReceipt` | `claimId:UUID`, `rewardType:DAILY/STREAK`, `milestoneDays:int?`, `ticketCount:int`, `grantedAt:instant?`, `expiresAt:instant?` |
 | `AttendanceMonth` | `month:month`, `attendanceDates:date[]`, `milestones:AttendanceMilestone[]`, `serverTime:instant` |
 
 AT02는 날짜나 보상량을 입력받지 않는다. 서버 KST 업무일로 출석과 일일·단계 보상을 함께 반영한다. 반복 응답의 `rewards`는 해당 출석에서 이미 확정한 보상이며 이번 호출에서 다시 지급했다는 뜻이 아니다. 보상이 0장이면 지급 원장 없이 보상 기록만 존재할 수 있어 `grantedAt=null`, `expiresAt=null`을 제안한다. 일일 보상 0장 허용 여부는 보상 수량·예약 정책 계약을 따른다.
 
+`RewardReceipt.rewardType`은 일일 출석 보상이면 `DAILY`, 연속 출석 단계 보상이면 `STREAK`이다. `milestoneDays`는 단계 보상일 때 달성한 단계 일수이고 일일 보상이면 `null`이다.
+
 매월 단계 보상은 각 단계당 1회다. 월중 연속이 끊겨도 이미 받은 단계 보상은 다시 지급하지 않는다. 초기 단계는 서버 정책에서 조회한다. 사용자 답변에 따라 `consecutiveDays`는 **같은 달의 실제 연속 일수(29~31일 포함)**를 반환한다. 단계 설정의 최대 28일과 실제 일수는 구분한다.
+
+## AT01·AT03 계산 규칙
+
+- `consecutiveDays`(AT01)는 오늘 기준으로 이어지고 있는 같은 달의 연속 일수다. 오늘 출석했으면 저장된 값, 어제 출석했고 오늘은 아직이면 저장된 값, 어제도 출석하지 않았거나 이번 달 기록이 없으면(월초 포함) 0이다.
+- `milestones`는 해당 달에 출석 기록이 있으면 그 달에 고정된 단계 묶음의 단계, 기록이 없으면 그 달에 적용될 묶음의 단계다. 단계는 단계 일수 오름차순이다.
+- `claimed`는 그 달에 해당 단계 보상을 이미 받았는지이고, 받은 뒤 연속이 끊겨도 유지한다. `claimedAt`은 그 보상의 응모권 지급 시각이며 받지 않았으면 `null`이다.
+- AT01에서 오늘 적용할 일일 정책이나 이번 달 단계 묶음이 없으면 AT02와 같은 업무 오류(500)로 응답한다.
+- `nextResetAt`은 다음 출석 기준일이 시작되는 시각(다음 KST 자정)이다.
+- AT03의 `month`는 `YYYY-MM` 형식만 허용하고 필수다. 형식 오류와 누락은 400 공통 오류다. 기록이 없는 달과 미래의 달은 오류가 아니며 `attendanceDates`는 빈 목록이다.
+- AT03에서 기록이 없는 달의 `milestones`는 그 달에 적용될 묶음의 단계를 `claimed=false`로 담는다. 적용할 묶음이 없으면 오류가 아니라 빈 목록이다.
 
 ## 브론즈 출석 보상 후속 반영
 
