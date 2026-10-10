@@ -48,6 +48,8 @@
 
 신규 접수는 멤버십·역할·기간·상태·보유량·누적 상한을 검증하고 응모 기록과 차감을 함께 확정한다. `acceptedAt < endsAt`이어야 하며 사용 응모권의 만료 전에도 확정되어야 한다. 도착 시각만으로 마감 전 응모를 인정하지 않는다. 거절은 해당 4xx 봉투로 반환하고 저장된 업무 거절 이력은 E05/E06에서 조회한다. 형식 오류·인증 실패의 조회 이력은 제공하지 않는다.
 
+**현행 구현 범위(백엔드 GD-134)**: 응모 ID는 `Idempotency-Key` 헤더의 UUID이며 접수된 응모의 `id`와 같다. 접수된 응모만 저장하므로 영수증의 `status`는 항상 `ACCEPTED`, `requestedAt`은 `acceptedAt`과 같고 `rejectionCode`·`rejectionReason`은 `null`이다. 거절은 4xx 봉투로만 반환하고, E05/E06의 거절 이력 조회와 거절 재전송의 최초 4xx 재반환은 후속 작업(GD-145), 응모 요청 속도 제한(429)은 후속 작업(GD-146)이다. 자격 조회 `reasons`는 위 응모 오류의 상수 이름(`ADMIN_ENTRY_FORBIDDEN`, `ENTRY_MEMBERSHIP_NOT_MET`, `EVENT_NOT_OPEN`, `ALREADY_ENTERED`, `TICKET_LIMIT_EXCEEDED`, `BRONZE_REQUIRED`)과 보유 부족 `INSUFFICIENT_TICKETS`다.
+
 자격 사전 조회 E07은 응모 보장이 아니다. E04에서 다시 검증한다. 일반 추가 응모와 동일 요청 재전송을 구분하며 사용자가 `prizeId`, 가중치, 접수 확정 시각을 지정할 수 없다.
 
 ## 관리자 응모·응모자 조회

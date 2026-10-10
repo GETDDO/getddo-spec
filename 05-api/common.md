@@ -53,7 +53,7 @@
 
 | 작업 | 제안 식별 기준 | 같은 요청 재처리 |
 | --- | --- | --- |
-| 응모 | `Idempotency-Key` 헤더, 1~100자; 사용자·이벤트·키 | 접수 성공 건은 기존 영수증을 200으로 반환하고, 저장된 거절 건은 최초와 같은 4xx·오류 코드를 반환한다. 추가 차감하지 않음 |
+| 응모 | `Idempotency-Key` 헤더, UUID(접수된 응모의 ID로 그대로 쓴다); 사용자·이벤트·키 | 접수 성공 건은 기존 영수증을 200으로 반환하고, 저장된 거절 건은 최초와 같은 4xx·오류 코드를 반환한다. 추가 차감하지 않음 |
 | 미션 제출 | 같은 헤더; 사용자·미션·키 | 저장된 제출 결과 재사용; 새로운 퀴즈 답변은 새 키 |
 | 출석 | 사용자·KST 출석일 | 같은 날 기록·보상 재사용. 자정 이후의 요청은 새 업무일 요청 |
 | 게임 결과 | 서버 발급 `playId` | 최초 확정 결과 재사용; 처리 중이면 202 |
@@ -75,6 +75,7 @@
 | 403 | `ACCESS_DENIED`, `ENTRY_MEMBERSHIP_NOT_MET`, `ADMIN_ENTRY_FORBIDDEN` | 제안 |
 | 404 | `RESOURCE_NOT_FOUND` | 제안, 업무 리소스 없음·소유권 은닉 정책은 구현 협의 |
 | 409 | `STATE_CONFLICT`, `IDEMPOTENCY_CONFLICT`, `ALREADY_ENTERED`, `TICKET_LIMIT_EXCEEDED`, `INSUFFICIENT_TICKETS`, `EVENT_NOT_OPEN`, `MISSION_NOT_OPEN` | 제안 |
+| 400·403·404·409 | 응모 `ENTRY-001`~`ENTRY-009`: 001 요청 형식 오류(400), 002 `ADMIN_ENTRY_FORBIDDEN`(403), 003 `ENTRY_MEMBERSHIP_NOT_MET`(403), 004 `EVENT_NOT_FOUND`(404), 005 `EVENT_NOT_OPEN`(409), 006 `ALREADY_ENTERED`(409), 007 `TICKET_LIMIT_EXCEEDED`(409), 008 `BRONZE_REQUIRED`(409), 009 `IDEMPOTENCY_CONFLICT`(409). 등급별 보유 부족은 응모권 `TICKET-006`(409) | 현행 코드(백엔드 GD-134), 위 제안 이름과 같은 이름 |
 | 429 | `RATE_LIMIT_EXCEEDED`와 `Retry-After` | 제안, 응모·출석·미션 제출·게임 결과 제출에 적용 |
 
 최종 업무 오류 번호·공개 메시지는 담당자가 정의한다. 아래 API의 오류 열은 공통 400·인증·권한·404·500 외의 주요 분기다. 빈도 제한 수치는 담당자 운영값이며 기능 적용 자체는 확정이다. 탐지 수치, 내부 어뷰징 근거, 예외 원문을 사용자 오류에 넣지 않는다.
@@ -94,7 +95,7 @@ POST /api/v1/events/0199abcd-1234-7000-8000-000000000010/entries
 Content-Type: application/json
 X-User-ID: 0199abcd-1234-7000-8000-000000000001
 X-User-Membership: vip
-Idempotency-Key: entry-0199abcd-1234-7000-8000-000000000099
+Idempotency-Key: 0199abcd-1234-7000-8000-000000000099
 
 {"tickets":{"GOLD":1,"SILVER":1}}
 ```
