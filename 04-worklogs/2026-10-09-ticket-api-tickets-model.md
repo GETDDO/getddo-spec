@@ -1,7 +1,7 @@
 # 작업 기록: 응모권 조회 API를 tickets·ticket_histories 모델로 갱신하고 용어 정리
 
 - 작성일: 2026-10-09
-- 관련 이슈 / PR: GD-73 / 백엔드 PR 36 / 스펙 PR 미생성
+- 관련 이슈 / PR: GD-73 / 백엔드 PR 36 / 스펙 PR 7
 - 상태: 검토 대기
 - 영향 범위: 공통 / 프론트엔드 / 백엔드
 
@@ -47,4 +47,4 @@
 ## 반영 결과
 
 - 변경한 명세: [응모권 API](../05-api/ticket.md), [응모권 규칙](../02-domain/ticket.md), [용어집](../02-domain/glossary.md), [요구사항 안내](../00-requirements/README.md), [API 목록](../05-api/README.md)
-- 관련 PR: 백엔드 PR 36, 스펙 PR 미생성
+- 관련 PR: 백엔드 PR 36, 스펙 PR 7
