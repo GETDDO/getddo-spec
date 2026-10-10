@@ -13,8 +13,9 @@
 
 - [응모권 API](../05-api/ticket.md)의 T01·T02 경로와 DTO를 새 모델로 바꿨다.
 - 관리자 조회(AO03·AO04·AO05·AO08)의 DTO 이름을 같은 모델에 맞췄다. 관리자 API는 구현 전 제안이다.
+- [기능 요구사항](../00-requirements/functional-requirements.md)의 "이력 합계와 잔액의 일치" 표시를 "응모권의 현재 상태와 마지막 이력의 일치 여부" 표시로 바꿨다. 변경 전: 이력 합계와 잔액의 일치 상태를 표시한다. 변경 후: 현재 상태와 마지막 이력의 일치 여부를 표시하고 불일치 응모권을 목록으로 확인한다.
 - [용어집](../02-domain/glossary.md)에 "보유 응모권"을 추가하고 차감 관련 정의에서 "잔액"을 뺐다.
-- [응모권 규칙](../02-domain/ticket.md), [요구사항 안내](../00-requirements/README.md), [API 목록](../05-api/README.md)의 "잔액" 표현을 "보유 응모권"으로 바꿨다.
+- [응모권 규칙](../02-domain/ticket.md), [요구사항 안내](../00-requirements/README.md), [기능 요구사항](../00-requirements/functional-requirements.md), [API 목록](../05-api/README.md)의 "잔액" 표현을 "보유 응모권"으로 바꿨다.
 
 ## 변경 전후
 
@@ -46,5 +47,5 @@
 
 ## 반영 결과
 
-- 변경한 명세: [응모권 API](../05-api/ticket.md), [응모권 규칙](../02-domain/ticket.md), [용어집](../02-domain/glossary.md), [요구사항 안내](../00-requirements/README.md), [API 목록](../05-api/README.md)
+- 변경한 명세: [응모권 API](../05-api/ticket.md), [응모권 규칙](../02-domain/ticket.md), [용어집](../02-domain/glossary.md), [요구사항 안내](../00-requirements/README.md), [기능 요구사항](../00-requirements/functional-requirements.md), [API 목록](../05-api/README.md)
 - 관련 PR: 백엔드 PR 36, 스펙 PR 7
