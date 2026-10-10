@@ -21,26 +21,30 @@
 | `EntryStatistics` | `eventId:UUID`, `participantCount:long`, `totalSpentTicketCount:long`, `mySpentTicketCount:long`, `serverTime:instant` |
 | `EntryEligibility` | `eventId:UUID`, `canEnter:boolean`, `reasons:string[]`, `usedTicketCount:long`, `remainingTicketLimit:long?`, `availableTicketBalance:long`, `serverTime:instant` |
 
-`participantCount`는 접수 완료된 응모자의 중복 제거 수다. 추가 응모 건수나 유효 추첨 후보 수와 다르다. 차감 합계는 접수 완료 건의 차감량이며 반환을 빼서 순사용량으로 바꾸지 않는다. `remainingTicketLimit=null`은 승인된 월말 소진용 이벤트의 수량 상한 없음이다. 잔액과 별개이며 `null`을 잔액 무제한으로 해석하지 않는다. 미사용 이벤트는 수량 관련 값이 0이고 1회 제한은 `canEnter`로 확인한다.
+`participantCount`는 접수 완료된 응모자의 중복 제거 수다. 추가 응모 건수나 유효 추첨 후보 수와 다르다. 차감 합계는 접수 완료 건의 차감량이며 반환을 빼서 순사용량으로 바꾸지 않는다. `remainingTicketLimit=null`은 승인된 월말 소진용 이벤트의 수량 상한 없음이다. 잔액과 별개이며 `null`을 잔액 무제한으로 해석하지 않는다. 미사용 이벤트는 수량 관련 값이 0이고 1회 제한은 `canEnter`로 확인한다. `availableTicketBalance`는 이 이벤트에서 실제로 쓸 수 있는 응모권 장수다. 가중치 미적용 이벤트는 브론즈만 쓸 수 있으므로 사용 가능한 브론즈 장수이고, 브론즈가 없으면 `canEnter=false`와 그 사유를 `reasons`에 담는다. 등급별 보유 장수는 T01의 `countByGrade`를 쓴다.
 
 갱신은 E03 재조회 방식으로 제안한다. 성공 응모 직후 E03·E07·T01을 재조회한다. 폴링 간격은 구현 담당자 설정이며 SSE·WebSocket을 필수 계약으로 추가하지 않는다. 당첨 확률은 반환하지 않는다.
 
 ## 응모 요청·응답
 
-`EntryRequest`의 유일한 필드는 필수 `ticketCount:int`다.
+`EntryRequest`의 유일한 필드는 `tickets`다. 사용자가 쓸 응모권의 등급별 장수를 담은 맵이며 키는 `BRONZE`·`SILVER`·`GOLD`, 값은 0 이상의 정수다. 없는 등급은 0으로 본다. 요청 합계는 서버가 계산하고 별도의 합계 필드는 받지 않는다. 등급별 장수는 보유 조회 T01의 `countByGrade`에서 고르며 그 등급의 현재 사용 가능한 장수를 넘을 수 없다. 같은 등급 안에서는 만료가 이른 응모권부터 차감한다.
 
 | 이벤트 | 허용 요청 | 서버 검증 |
 | --- | --- | --- |
-| 미사용 | `0` | 사용자당 1회, 경품 선택 없음 |
-| 사용·가중치 미적용 | `1` | 사용자당 1회 |
-| 사용·일반 가중치 | `1..5` | 기존 누적 사용량 + 요청량 ≤ 5 |
-| 사용·월말 소진용 | 양의 정수 | `TICKET`·가중치 적용·`maxTicketsPerUser=null` 조합과 유효 잔액; 운영 허용 조건은 월말 소진용 이벤트 운영 조건 |
+| 미사용 | `tickets` 생략 또는 `{}` (합계 `0`) | 사용자당 1회, 경품 선택 없음 |
+| 사용·가중치 미적용 | `{"BRONZE": 1}`만 허용 | 사용자당 1회. 브론즈 외 등급이 하나라도 있으면 거절 |
+| 사용·일반 가중치 | 합계 `1..5` | 기존 누적 사용량 + 요청 합계 ≤ 5 |
+| 사용·월말 소진용 | 합계가 양의 정수 | `TICKET`·가중치 적용·`maxTicketsPerUser=null` 조합과 등급별 유효 보유량; 운영 허용 조건은 월말 소진용 이벤트 운영 조건 |
 
 ```json
-{ "ticketCount": 2 }
+{ "tickets": { "GOLD": 2, "SILVER": 5 } }
 ```
 
-`EntryReceipt`: `id:UUID`, `eventId:UUID`, `eventTitle:string`, `requestedTicketCount:int`, `deductedTicketCount:int`, `status:ACCEPTED/REJECTED`, `requestedAt:instant`, `acceptedAt:instant?`, `rejectionCode:string?`, `rejectionReason:string?`.
+가중치 미적용 이벤트는 등급이 추첨에 쓰이지 않으므로 비싼 등급을 실수로 쓰지 않도록 브론즈 응모권만 쓸 수 있다. 이 이벤트에 응모하려면 사용 가능한 브론즈가 1장 이상이어야 하며, 브론즈가 없는 사용자는 다른 등급이 있어도 응모할 수 없다. 이 경우는 일반 보유량 부족과 구분되는 안내(브론즈 응모권이 필요하다는 메시지)를 반환한다.
+
+`EntryReceipt`: `id:UUID`, `eventId:UUID`, `eventTitle:string`, `requestedTicketCount:int`, `requestedTicketsByGrade:{BRONZE,SILVER,GOLD:int}`, `deductedTicketCount:int`, `deductedTicketsByGrade:{BRONZE,SILVER,GOLD:int}`, `status:ACCEPTED/REJECTED`, `requestedAt:instant`, `acceptedAt:instant?`, `rejectionCode:string?`, `rejectionReason:string?`.
+
+`requestedTicketCount`와 `deductedTicketCount`는 등급별 장수의 합계이며, 등급별 맵은 장수가 0인 등급도 포함한다. 거절 건의 `deductedTicketsByGrade`는 모두 0이다. 같은 멱등 키로 등급별 장수가 다른 요청이 오면 409로 거절한다.
 
 신규 접수는 멤버십·역할·기간·상태·보유량·누적 상한을 검증하고 응모 기록과 차감을 함께 확정한다. `acceptedAt < endsAt`이어야 하며 사용 응모권의 만료 전에도 확정되어야 한다. 도착 시각만으로 마감 전 응모를 인정하지 않는다. 거절은 해당 4xx 봉투로 반환하고 저장된 업무 거절 이력은 E05/E06에서 조회한다. 형식 오류·인증 실패의 조회 이력은 제공하지 않는다.
 

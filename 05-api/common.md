@@ -96,7 +96,7 @@ X-User-ID: 0199abcd-1234-7000-8000-000000000001
 X-User-Membership: vip
 Idempotency-Key: entry-0199abcd-1234-7000-8000-000000000099
 
-{"ticketCount":2}
+{"tickets":{"GOLD":1,"SILVER":1}}
 ```
 
 - 멤버십 헤더로 DB 멤버십을 변경하거나 등급을 상향하지 않는다. 등급을 바꿔 시연할 때는 해당 등급의 사전 등록 사용자를 선택한다.
