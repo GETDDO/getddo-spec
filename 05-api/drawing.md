@@ -43,7 +43,7 @@
 | AD02 | `GET /admin/draws/{drawId}` | 없음 | 200 `DrawRunDetail` | 공통 |
 | AD03 | `GET /admin/draws/{drawId}/participants` | `page,size` | 200 `Page<DrawCandidate>` | 공통 |
 | AD04 | `POST /admin/draws/{drawId}/checks` | 본문 없음 | 201 `DrawVerification` | 409 미확정 실행 |
-| AD05 | `POST /admin/wins/{winId}/cancellations` | 멱등 헤더, `AwardCancellationRequest` | 202 `AwardCancellationResult`; 이미 확정된 동일 처리 200 | 409 취소 불가·부정 미확정·키 충돌 |
+| AD05 | `POST /admin/wins/{winId}/cancellations` | 멱등 헤더, `AwardCancellationRequest` | 202 `AwardCancellationResult`; 이미 확정된 동일 처리 200 | 409 취소 불가·키 충돌 |
 | AD06 | `POST /admin/draws/{drawId}/publication` | `ReasonRequest` | 200 `PublicationUpdateResult` | 409 재추첨 아님·미확정·이벤트 취소·최초 발표 전 |
 | AD07 | `GET /admin/events/{eventId}/result-changes` | `page,size` | 200 `Page<PublicListChange>` | 공통 |
 | AD08 | `GET /admin/draws/{drawId}/checks` | `page,size` | 200 `Page<DrawVerification>` | 공통 |
@@ -73,7 +73,7 @@ AD01~AD07의 업무 ID를 유지하고 검증 이력·실행 시작 및 재개�
 
 ## 당첨 취소와 즉시 재추첨
 
-`AwardCancellationRequest`: 필수 `reason:string`. `abuseCaseId`의 요청·저장 연계는 어뷰징 영역 검토 이후 재논의하며 이번 갱신에서는 채택하지 않는다. 자격 미달·부정의 확인 근거가 필요하다는 기존 정책을 제거하는 것은 아니다.
+`AwardCancellationRequest`: 필수 `reason:string`. 관리자가 사유를 기록해 개별 당첨을 취소할 수 있으며 어뷰징·자격 미달 확인을 필수 조건으로 요구하지 않는다. 부정 미확정을 일반 관리자 취소의 거절 조건으로 사용하지 않는다. `abuseCaseId`의 선택적 요청·저장 연계는 후속 확인이며 필수 계약으로 채택하지 않는다. 사유 누락·권한·취소 대상·멱등 충돌 등의 상세 오류 계약은 구현 전에 확인한다.
 
 `AwardCancellationResult`: `cancellationId:UUID`, `canceledDrawResultId:UUID`, `replacementDrawRunId:UUID`, `status:PREPARING/READY/RUNNING/CONFIRMED/FAILED`, `canceledAt:instant`.
 
@@ -108,3 +108,10 @@ AD06은 최초 발표 이후 재추첨 결과 확인·공개 명단 갱신용이
 - 과거 제외 상태·스냅샷·응답을 소급 삭제하거나 재작성하지 않는다. 기존 데이터가 있는 경우의 조회 호환성과 공개 API 전환은 구현 전 담당자와 검토한다.
 - 지급 후 당첨 취소·재추첨과 마감 후 5분 일정은 후속 결정 전까지 유지한다.
 - 결정 기록: [ADR-018](../03-decisions/018-pre-issuance-abuse-blocking-and-no-draw-exclusion.md).
+
+## 2026-10-12 일반 관리자 취소·재추첨 정책 반영
+
+- AD05는 관리자 사유에 따른 개별 당첨 취소와 빈 자리 재추첨 등록에 사용한다. AD09는 이미 연결된 동일 실행의 시작·재개이며 새 전체 재추첨을 생성하지 않는다.
+- 유지 당첨자·경품·최초 가중치, 취소와 등록의 원자성 및 확정 결과 불변을 유지한다. 당첨 취소·재추첨을 이유로 응모권을 반환하거나 회수하지 않는다.
+- 전체 당첨 취소·처음부터 전체 재추첨은 추후 추가 예정이며 신규 경로·DTO를 이번 초안에 추가하지 않는다.
+- 기존 상세 API 초안의 검토 상태는 유지하며 정책 변경만 반영한다. 결정 기록: [ADR-019](../03-decisions/019-admin-award-cancellation-and-partial-redraw.md).
