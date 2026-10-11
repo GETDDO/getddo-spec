@@ -1,6 +1,6 @@
 # 추첨·결과 API 초안
 
-- 상태: 검토 대기 — 담당자 확인 전
+- 상태: 이번 정책 변경 검토 완료 (2026-10-11) / 상세 API 계약은 담당자 검토 대기
 - 갱신일: 2026-10-05 — GD-93 추첨 ERD 검토와 사용자 결정 반영
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [추첨·결과 규칙](../02-domain/drawing.md)
@@ -19,7 +19,7 @@
 `PublicResults`:
 
 - `eventId:UUID`, `isPublished:boolean`, `publicationScheduledAt:instant`, `publishedAt:instant?`, `revision:int?`, `updatedAt:instant?`, `serverTime:instant`
-- `displayStatus:WAITING/PUBLISHED/CANCELED/NO_ENTRANTS/NO_ELIGIBLE_ENTRANTS` — 공개용 제안 값
+- `displayStatus:WAITING/PUBLISHED/CANCELED/NO_ENTRANTS` — 공개용 제안 값
 - `prizes:PublishedPrize[]`; `PublishedPrize`는 `prizeId:UUID`, `rank:int`, `name:string`, `winnerCount:int`, `unfilledCount:int`, `winners:MaskedWinner[]`
 - `MaskedWinner`: `maskedName:string`, `maskedPhoneNum:string?`, `maskedEmail:string?`. 원본 개인정보·사용자 ID·후보 가중치·검토 사유를 포함하지 않는다. 세부 마스킹 규칙은 담당자 계약에 따른다.
 
@@ -29,9 +29,9 @@
 
 공개된 `prizes`는 등수 내림차순으로 전달해 하위 등수부터 연출할 수 있게 제안한다. 실제 선정은 상위 등수부터 진행한다. 후보 부족으로 확정된 미충원은 `unfilledCount`로 표현하며, 진행 중인 재추첨이나 관리자 확인 대기를 미충원으로 처리하지 않는다. 관리자 미확인 결과는 노출하지 않는다. 최초 발표 이후 취소부터 공개 갱신 전까지의 취소자 임시 표시는 후속 계약이다.
 
-`MyResult`: `eventId:UUID`, `result:NOT_ENTERED/PENDING/WON/LOST/EXCLUDED/CANCELED`, `prize:Prize?`, `exclusionReason:string?`, `isPublished:boolean`, `revision:int?`, `serverTime:instant`.
+`MyResult`: `eventId:UUID`, `result:NOT_ENTERED/PENDING/WON/LOST/CANCELED`, `prize:Prize?`, `isPublished:boolean`, `revision:int?`, `serverTime:instant`.
 
-`result`는 API 전용 제안 값이다. 본인 제외는 일반 낙첨과 구분한다. 최초 발표가 지연돼도 공개 전 당첨 여부는 `PENDING`, `prize=null`로 유지한다. 제외 사유는 본인에게만 공개 가능한 문구로 제공한다. 발표 후 당첨 취소·재추첨 중 본인 표시의 중간 상태는 후속 계약이다.
+`result`는 API 전용 제안 값이다. 최초 발표가 지연돼도 공개 전 당첨 여부는 `PENDING`, `prize=null`로 유지한다. 발표 후 당첨 취소·재추첨 중 본인 표시의 중간 상태는 후속 계약이다.
 
 ## 관리자 추첨·공개 명단
 
@@ -62,7 +62,7 @@ AD01~AD07의 업무 ID를 유지하고 검증 이력·실행 시작 및 재개�
 | `DrawResult` | `id:UUID`, `prizeId:UUID`, `prizeRank:int`, `slotNumber:int`, `selectionOrder:int?`, `resultType:SELECTED/UNFILLED`, `candidateId:UUID?`, `userId:UUID?`, `wasPublished:boolean`, `isCanceled:boolean` |
 | `DrawVerification` | `id:UUID`, `drawRunId:UUID`, `passed:boolean`, `checks:{code:string,passed:boolean,message:string}[]`, `verifiedAt:instant`, `verifiedBy:UUID` |
 
-- AD03은 요청 실행에 실제로 사용한 후보 명단을 반환한다. 재추첨 후보의 ID·수량·가중치·두 스냅샷은 최초 후보 정보를 재사용하며 매 실행의 새 후보 상세 정보로 해석하지 않는다. 원래 응모 자격·가중치를 유지하고 기존 당첨자·취소자 및 이후 제외 확정자를 제거한다. 실제 내부 조회 경로는 백엔드 설계 문서에서 관리한다.
+- AD03은 요청 실행에 실제로 사용한 후보 명단을 반환한다. 재추첨 후보의 ID·수량·가중치·두 스냅샷은 최초 후보 정보를 재사용하며 매 실행의 새 후보 상세 정보로 해석하지 않는다. 원래 응모 자격·가중치를 유지하고 기존 당첨자·취소자를 제거한다. 어뷰징 차단 기록을 이유로 다른 정상 응모를 제거하지 않는다. 실제 내부 조회 경로는 백엔드 설계 문서에서 관리한다.
 - AD02의 `cancellations`는 최초 실행에서 빈 목록, 재추첨에서 한 건 이상이다. 취소별 원래 결과와 그 결과를 만든 실행 ID를 제공한다. `previousDrawId`는 제거하고 시간순 실행은 `runNumber`로 구분한다. `originalDrawId`는 이벤트의 최초 실행을 뜻하며 시간상 직전 실행이나 취소 원본 실행과 혼동하지 않는다.
 - 취소 처리자를 실행자 `executedBy` 하나로 치환하지 않고, 취소 사유를 실행 사유 `reason` 하나로 임의 합치지 않는다. 실행 상세에는 연결된 취소 근거를 목록으로 제공한다. 다른 관리자의 시작·재개 행위는 별도 감사 이력 연계 대상이며 취소 기록으로 대신하지 않는다.
 - `lastFailureMessage`는 `lastFailureCode`를 관리자용 문구로 변환한 값이다. 기존 `lastFailureReason`은 대체하고 원문 예외·스택 트레이스를 응답하지 않는다. 필요하면 접근 권한이 있는 진단 기록을 `lastFailureTraceId`로 연계한다. 구체적인 코드·문구 사전과 추적 연계는 구현 후속이다.
@@ -101,3 +101,10 @@ AD06은 최초 발표 이후 재추첨 결과 확인·공개 명단 갱신용이
 - 변경 전: 최초 공개 전 취소·재추첨의 확인·최초 명단 구성은 미확정이었다. 변경 후: 확인된 최종 명단을 공개하고 준비·확인이 늦으면 최초 발표를 지연한다. 정상 자동 최초 발표는 유지한다.
 - 경로·신규 DTO의 세부 검증·오류 코드·멱등 처리, 최초 공개 전 확인 API와 지연 안내, 감사 연동·어뷰징 근거 연결은 [후속 사항](../00-requirements/pending-decisions.md)을 따른다.
 - 내부 스키마·트랜잭션·Query·검증은 [백엔드 DB 문서](https://github.com/GETDDO/getddo-be/tree/dev/docs/03-database)와 [백엔드 ADR](https://github.com/GETDDO/getddo-be/tree/dev/docs/04-decisions)에서 관리한다.
+
+## 2026-10-11 추첨 제외 폐지
+
+- 신규 응답은 어뷰징 추첨 제외 결과·제외 사유와 전원 제외 종료를 제공하지 않는다. 응모자 없음 종료는 유지한다.
+- 과거 제외 상태·스냅샷·응답을 소급 삭제하거나 재작성하지 않는다. 기존 데이터가 있는 경우의 조회 호환성과 공개 API 전환은 구현 전 담당자와 검토한다.
+- 지급 후 당첨 취소·재추첨과 마감 후 5분 일정은 후속 결정 전까지 유지한다.
+- 결정 기록: [ADR-018](../03-decisions/018-pre-issuance-abuse-blocking-and-no-draw-exclusion.md).

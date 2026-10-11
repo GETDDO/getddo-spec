@@ -1,6 +1,6 @@
 # 이벤트 API 초안
 
-- 상태: 검토 대기 — 담당자 확인 전
+- 상태: 이번 정책 변경 검토 완료 (2026-10-11) / 상세 API 계약은 담당자 검토 대기
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [이벤트 규칙](../02-domain/event.md)
 
@@ -19,7 +19,7 @@
 | `EventDetail` | EventSummary 전체 + `description:string`, `maxTicketsPerUser:int?`, `prizes:Prize[]` |
 | `Prize` | `id:UUID`, `rank:int`, `name:string`, `description:string?`, `imageUrl:string?`, `winnerCount:int` |
 
-`EventStatus`의 제안 값은 `SCHEDULED`, `OPEN`, `CLOSED`, `DRAW_CONFIRMED`, `PUBLISHED`, `CANCELED`, `REDRAWING`, `NO_ENTRANTS`, `NO_ELIGIBLE_ENTRANTS`다. 현행 DB의 `SUSPENDED`는 이번 요구사항에서 제외된 상태이므로 API 계약에 포함하지 않는다. 관리자에게는 운영 상태를 제공하지만 사용자 목록·상세에서 `REDRAWING`을 그대로 노출하지 않는다. 이미 발표된 이벤트는 공개 상태를 유지하고 최초 발표 전에는 기존 대기 상태로 표현하도록 제안한다. 공개 결과에는 별도 공개 여부를 사용하며 이벤트 상태만으로 당첨 정보를 노출하지 않는다. 구체적인 중간 결과 표시 범위는 [결과 조회](drawing.md#공개-결과와-본인-결과)의 공개 중간 상태를 따른다.
+`EventStatus`의 제안 값은 `SCHEDULED`, `OPEN`, `CLOSED`, `DRAW_CONFIRMED`, `PUBLISHED`, `CANCELED`, `REDRAWING`, `NO_ENTRANTS`다. 어뷰징 전원 제외 종료 상태는 신규 계약에서 사용하지 않는다. 과거 종료 상태의 조회 호환성은 담당자가 별도로 검토하며 저장 이력을 소급 변경하지 않는다. 현행 DB의 `SUSPENDED`는 이번 요구사항에서 제외된 상태이므로 API 계약에 포함하지 않는다. 관리자에게는 운영 상태를 제공하지만 사용자 목록·상세에서 `REDRAWING`을 그대로 노출하지 않는다. 이미 발표된 이벤트는 공개 상태를 유지하고 최초 발표 전에는 기존 대기 상태로 표현하도록 제안한다. 공개 결과에는 별도 공개 여부를 사용하며 이벤트 상태만으로 당첨 정보를 노출하지 않는다. 구체적인 중간 결과 표시 범위는 [결과 조회](drawing.md#공개-결과와-본인-결과)의 공개 중간 상태를 따른다.
 
 ## 관리자 이벤트 등록·운영
 

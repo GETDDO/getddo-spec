@@ -1,6 +1,6 @@
 # 응모권 API 초안
 
-- 상태: 검토 대기 — 담당자 확인 전
+- 상태: 이번 정책 변경 검토 완료 (2026-10-11) / 상세 API 계약은 담당자 검토 대기
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [응모권 규칙](../02-domain/ticket.md)
 
@@ -41,7 +41,7 @@ T02는 `createdAt DESC, id DESC` 순서의 커서 페이지다. `from`·`to`는 
 | `TicketGrant` | `historyId:UUID`, `ticketId:UUID`, `userId:UUID`, `userName:string`, `grade:BRONZE/SILVER/GOLD`, `sourceType:ATTENDANCE/MISSION/GAME`, `sourceId:UUID`, `missionId:UUID?`, `grantedAt:instant`, `expiresAt:instant` |
 | `AdminTicketHistory` | TicketHistory 전체 + `userId:UUID` |
 | `TicketConsistency` | `userId:UUID`, `availableCount:long`, `isConsistent:boolean`, `inconsistencies:{ticketId:UUID,ticketVersion:long,latestHistoryVersion:long}[]`, `checkedAt:instant` |
-| `TicketRefund` | `id:UUID`, `spendHistoryId:UUID`, `eventId:UUID`, `userId:UUID`, `reasonType:EVENT_CANCELED/PARTICIPANT_EXCLUDED`, `status:PENDING/PROCESSING/COMPLETED/FAILED`, `targetExpiresAt:instant?`, `attemptCount:int`, `createdAt:instant`, `completedAt:instant?` |
+| `TicketRefund` | `id:UUID`, `spendHistoryId:UUID`, `eventId:UUID`, `userId:UUID`, `reasonType:EVENT_CANCELED`, `status:PENDING/PROCESSING/COMPLETED/FAILED`, `targetExpiresAt:instant?`, `attemptCount:int`, `createdAt:instant`, `completedAt:instant?` |
 
 `keyword`는 사용자 이름 검색으로 제안하며 정확한 사용자 ID는 `userId`로 필터링한다. AO03의 `sourceId`는 출석·미션 제출·게임 플레이 원본 ID로 산출한다. 응모권 지급 이력과 현재 상태의 정합성 확인을 함께 제공한다. `isConsistent`는 같은 기준 시점에 응모권의 현재 버전·상태와 마지막 이력의 버전·상태를 비교한 결과여야 하며 단순히 항상 true로 반환하지 않는다. 불일치한 응모권만 `inconsistencies`에 담고, 없으면 `isConsistent`가 true다. `TicketGrant`는 응모권 한 장의 지급 이력이므로 한 번의 보상으로 여러 장을 지급하면 장수만큼 행이 나온다.
 
@@ -54,3 +54,7 @@ AO08은 처리 이력 조회다. 이를 근거로 이벤트 취소 완료 후 �
 게임·미션 보상은 [등급 응모권 규칙](../02-domain/ticket.md#게임미션-보상의-등급-추첨)을 따른다. T01·T02는 등급별 보유량(`countByGrade`, `holdings`)과 이력의 등급(`grade`)을 포함하도록 갱신했다. 지급 결과와 가중치 표현은 아직 확정하지 않았다. 게임·미션 보상의 실제 지급 장수는 1이며 가중치 값을 `ticketCount`나 `quantity`에 넣지 않는다. 미션의 보상 수량을 임의 설정하는 종전 요청 초안도 새 정책에 맞춰 재검토한다. 응모 시 차감은 사용자가 등급별 장수를 고르며(규칙은 [응모권 규칙](../02-domain/ticket.md#응모권-경제운영)), 요청·응답 필드는 [응모 API](entry.md#응모-요청응답)를 따른다. 미결정 항목은 [등급 응모권 후속 사항](../00-requirements/pending-decisions.md#등급-응모권)을 따른다.
 
 이번 버전의 신규 처리 유형에서 REVOKE는 제외한다. 기존 저장 이력의 조회 호환 처리는 담당자가 별도 확인하며, 이번 명세 변경으로 기존 이력을 삭제하지 않는다.
+
+## 2026-10-11 추첨 제외 반환 폐지
+
+신규 반환은 이벤트 취소에 따른 반환을 제공하며 추첨 제외에 따른 반환을 생성하지 않는다. 기존 `PARTICIPANT_EXCLUDED` 반환 이력의 조회 호환성은 담당자가 확인하며 과거 이력을 삭제·재작성하지 않는다. 지급 전 차단된 요청에는 응모권을 지급하지 않는다. 차단 기록과 지급 처리의 연결 계약은 담당자 간 확인 후 구현한다.

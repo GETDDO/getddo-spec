@@ -1,6 +1,6 @@
 # 응모 API 초안
 
-- 상태: 검토 대기 — 담당자 확인 전
+- 상태: 이번 정책 변경 검토 완료 (2026-10-11) / 상세 API 계약은 담당자 검토 대기
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [응모 규칙](../02-domain/entry.md)
 
@@ -57,9 +57,13 @@
 | ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
 | --- | --- | --- | --- | --- |
 | AO06 | `GET /admin/entries` | `page,size,userId,eventId,status,from,to` | 200 `Page<AdminEntry>` | 공통 |
-| AO07 | `GET /admin/events/{eventId}/participants` | `page,size,eligibilityStatus` | 200 `Page<AdminParticipant>` | 공통 |
+| AO07 | `GET /admin/events/{eventId}/participants` | `page,size` | 200 `Page<AdminParticipant>` | 공통 |
 
 | DTO | 필드 |
 | --- | --- |
 | `AdminEntry` | EntryReceipt 전체 + `userId:UUID`, `participantId:UUID?` |
-| `AdminParticipant` | `id:UUID`, `eventId:UUID`, `userId:UUID`, `usedTicketCount:long`, `eligibilityStatus:ELIGIBLE/EXCLUDED`, `exclusionReasonCode:ABUSE/INELIGIBLE/null`, `exclusionReason:string?`, `excludedAt:instant?`, `createdAt:instant` |
+| `AdminParticipant` | `id:UUID`, `eventId:UUID`, `userId:UUID`, `usedTicketCount:long`, `createdAt:instant` |
+
+## 2026-10-11 추첨 제외 폐지
+
+관리자 참여 허용·추첨 제외 결정은 제공하지 않는다. AO07의 신규 필터·DTO에 제외 상태·사유·시각을 포함하지 않는다. 정상 접수된 유효 응모를 차단 기록으로 추첨에서 제외하지 않는다. 기존 데이터에 제외 정보가 있는 경우의 조회 호환성은 구현 전 담당자와 확인하며 저장 이력을 삭제하지 않는다.

@@ -58,3 +58,7 @@
 - 어뷰징 기준 담당자 수정은 확정 정책의 운영 작업이다. 가중치·마스킹·게임 세부 규칙·배너·누락 원문 및 미선택 개인정보 처리 방식은 [후속 목록](../00-requirements/pending-decisions.md)에 구분한다.
 
 상세 기준은 [기능 요구사항](../00-requirements/functional-requirements.md)과 각 [도메인 규칙](../02-domain/README.md)을 따른다. 실제 API·DDL 구현은 이번 문서 반영에 포함하지 않는다.
+
+## 2026-10-11 부분 대체 안내
+
+관리자 참여 허용·추첨 제외와 제외에 따른 반환 부분은 [ADR-018](018-pre-issuance-abuse-blocking-and-no-draw-exclusion.md)과 최신 요구사항·도메인 규칙을 따른다. 위 본문은 당시 결정 이력으로 보존하며 관련 없는 결정은 유지한다.
