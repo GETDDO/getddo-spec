@@ -6,7 +6,7 @@
 - 작성자 / 날짜: 사용자 결정에 따라 Claude 정리 / 2026-09-21
 - 검토자: 사용자 명시적 결정, 팀 검토는 Pull Request에서 진행
 - 관련 작업 기록 / PR: [2026-09-21 출석·미션·게임 도메인 규칙 정립](../04-worklogs/2026-09-21-reward-domain-rules.md)
-- 대체한 ADR / 대체된 ADR: 미션 소속·반복 달성·재도전 관련 내용은 [ADR-006](006-common-repeatable-missions.md)으로 부분 대체. 출석·게임 규칙은 유지한다.
+- 대체한 ADR / 대체된 ADR: 미션 소속·반복 달성·재도전 관련 내용은 [ADR-006](006-common-repeatable-missions.md)으로 부분 대체. 출석 규칙은 유지한다. 게임의 최소 점수 없는 보상 조건은 [ADR-020](020-game-reward-minimum-score.md)으로 대체한다.
 
 ## 배경
 

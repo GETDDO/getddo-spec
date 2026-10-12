@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-12 게임별 최소 보상 점수 반영](2026-10-12-game-reward-minimum-score.md)
+
 - [2026-10-12 글자색깔 맞추기 연동 계약 채택 반영](2026-10-12-color-word-api-adoption.md)
 
 - [2026-10-12 글자색깔 맞추기 API 연동 초안](2026-10-12-color-word-api-draft.md)
