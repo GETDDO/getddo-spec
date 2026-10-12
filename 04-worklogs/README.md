@@ -40,6 +40,12 @@
 
 ## 기록 목록
 
+- [2026-10-12 글자색깔 맞추기 연동 계약 채택 반영](2026-10-12-color-word-api-adoption.md)
+
+- [2026-10-12 글자색깔 맞추기 API 연동 초안](2026-10-12-color-word-api-draft.md)
+
+- [2026-10-12 글자색깔 맞추기 플레이 규칙 확정 반영](2026-10-12-color-word-rules.md)
+
 - [2026-10-12 알림 자동 재시도·관리자 실패 복구 정책 명확화](2026-10-12-notification-failure-recovery.md)
 
 - [2026-10-08 관리자 이벤트 응답의 createdBy 제거](2026-10-08-remove-event-created-by.md)
