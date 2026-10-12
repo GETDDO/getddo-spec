@@ -81,3 +81,5 @@
 
 - [2026-09-21 미결정 사항 순차 확정](2026-09-21-pending-decisions.md)
 - [최초 추첨 실패 재개 API의 확인된 계약 반영](2026-10-12-initial-draw-resume-api.md) — 검토 대기
+
+- [2026-10-12 개별 당첨 취소·재추첨 승인 API 반영](2026-10-12-award-cancellation-api.md)

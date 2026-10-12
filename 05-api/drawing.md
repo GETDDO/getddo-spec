@@ -1,11 +1,11 @@
 # 추첨·결과 API 초안
 
-- 상태: 정책 변경 검토 완료 / 최초 재개 GD-87 일부 계약 확정(2026-10-12), 나머지 상세 API 계약은 담당자 검토 대기
-- 갱신일: 2026-10-12 — 사용자 승인 최초 재개 GD-87 일부 계약 반영
+- 상태: 정책 변경 검토 완료 / 최초 재개 GD-87 및 개별 취소·재추첨 GD-138 일부 계약 확정(2026-10-12), 나머지 상세 API 계약은 담당자 검토 대기
+- 갱신일: 2026-10-12 — 사용자 승인 GD-87 최초 재개 및 GD-138 AD05·AD09 일부 계약 반영
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [추첨·결과 규칙](../02-domain/drawing.md)
 
-아래 GD-87 최초 재개 절에서 승인한 항목 외의 경로·메서드·DTO·업무 오류 코드는 구현 전 제안이다. 확정된 업무 정책은 연결된 요구사항·도메인 문서를 따른다. 이번 갱신은 API 초안과 정책 결정을 동기화하며 구현 완료를 뜻하지 않는다. 기본 경로 `/api/v1`은 생략한다.
+아래 GD-87 최초 재개 및 GD-138 개별 취소·재추첨 절에서 승인한 항목 외의 경로·메서드·DTO·업무 오류 코드는 구현 전 제안이다. 확정된 업무 정책은 연결된 요구사항·도메인 문서를 따른다. 이번 갱신은 API 초안과 정책 결정을 동기화하며 구현 완료를 뜻하지 않는다. 기본 경로 `/api/v1`은 생략한다.
 
 ## 사용자 결과 조회
 
@@ -47,7 +47,7 @@
 | AD06 | `POST /admin/draws/{drawId}/publication` | `ReasonRequest` | 200 `PublicationUpdateResult` | 409 재추첨 아님·미확정·이벤트 취소·최초 발표 전 |
 | AD07 | `GET /admin/events/{eventId}/result-changes` | `page,size` | 200 `Page<PublicListChange>` | 공통 |
 | AD08 | `GET /admin/draws/{drawId}/checks` | `page,size` | 200 `Page<DrawVerification>` | 공통 |
-| AD09 | `POST /admin/cancellations/{cancellationId}/redraws` | 본문 없음 | 202 `DrawRun`; 이미 확정된 동일 실행 200 | 409 실행·재개 불가 |
+| AD09 | `POST /admin/cancellations/{cancellationId}/redraws` | 본문 없음 | 202 `DrawExecutionResponse`; 이미 확정된 동일 실행 200 | 409 실행·재개 불가 |
 
 AD01~AD07의 업무 ID를 유지하고 검증 이력·실행 시작 및 재개는 AD08~AD09로 추가했다. 이전 경로의 별칭 API를 제공하는 것으로 해석하지 않는다. 기존 초안의 `draw-runs`, `verifications`, `cancel-and-redraw`, `public-list-updates`, `public-list-changes`, `results/me` 경로를 위 제안 경로로 갱신했다. 사용자 2개·관리자 9개 구성이다. 요청·응답·업무 오류의 추가 세부사항은 구현 전 확인한다.
 
@@ -69,6 +69,25 @@ AD01~AD07의 업무 ID를 유지하고 검증 이력·실행 시작 및 재개�
 최초 재개 진입점은 GD-87, 당첨 취소·재추첨 시작 및 재개 AD05·AD09는 GD-138 책임이다. 일반 자동 실행이 운영자 확인 대기를 해제하지 않는 원칙을 유지한다. 실제 처리자·시작 및 재개 행위는 감사 이력과 연결하고 취소 처리자로 대체하지 않는다.
 
 이 절은 확인된 외부 계약을 기록하며 구현·운영 적용 완료를 뜻하지 않는다. 실패 상세 조회는 GD-137과 연결하고 별도 중복 조회 경로를 추가하지 않는다. 응답 DTO 필드와 재시도 예약·운영자 대기의 저장 방식은 백엔드 구현 계약에서 관리하며 실행 검증 결과와 구분한다.
+
+## 개별 취소·재추첨 — GD-138 일부 계약 확정
+
+2026-10-12 사용자 승인 범위는 아래 항목이다. AD09 응답은 기존 메타데이터 전용 `DrawRun` 초안에서 GD-87의 `DrawExecutionResponse` 재사용으로 변경해 확정 결과 재반환을 응답에서도 확인한다. 프론트엔드는 AD09의 `runId`, `status`, `confirmation`을 사용한다. 다른 조회·공개 API의 `DrawRun` 계약은 이 승인으로 변경하지 않는다.
+
+| 항목 | 확인한 계약 |
+| --- | --- |
+| AD05 경로 | `POST /admin/wins/{winId}/cancellations` |
+| AD05 입력 | UUID `Idempotency-Key` 필수, `reason` 필수·양끝 공백 제거 후 1~1000자 |
+| AD05 응답 | `AwardCancellationResult`의 cancellationId, canceledDrawResultId, replacementDrawRunId, status, canceledAt |
+| AD09 경로·입력 | `POST /admin/cancellations/{cancellationId}/redraws`, 본문 없음. 기존 취소에 연결된 같은 실행만 사용 |
+| AD09 응답 | `ResponseEnvelope<DrawExecutionResponse>`; runId:UUID, status, confirmation:null 또는 저장된 확정 결과 |
+| 권한·성공 | 활성 관리자만 허용, 저장된 CONFIRMED 결과는 200, 미확정은 202 |
+| 거절 | 없는 대상 404, 취소 불가·멱등 키/본문 충돌 409. 형식·사유 검증 실패는 400, 유효 비관리자 문맥은 403 |
+| 동시 취소 | 같은 이벤트에 미확정 REPLACEMENT가 있으면 다른 당첨의 새 취소는 409. 기존 취소 재요청·AD09 시작/재개는 허용 |
+
+`confirmation`은 `confirmedAt:instant`와 저장된 `results` 목록이다. 결과 항목은 `resultId:UUID`, `prizeId:UUID`, `rank:int`, `slotNumber:int`, `selectionOrder:int?`, `candidateId:UUID?`, `userId:UUID?`, `resultType:SELECTED/UNFILLED`를 제공한다. CONFIRMED 재요청은 같은 저장 결과를 반환하며 재선정하지 않는다. 실패 원문·스택 트레이스를 응답에 추가하지 않는다.
+
+위 HTTP 상태의 승인은 `CANCEL-001`~`CANCEL-004` 등 오류 코드 문자열 사전의 확정을 뜻하지 않는다. 멱등 키를 당첨 결과별로 적용할지 전역으로 적용할지와 상세 오류 코드 문자열은 추가 판단 대상으로 남긴다. 구현의 전역 UNIQUE를 승인된 공용 정책으로 해석하지 않는다. 전체 당첨 취소·전체 재추첨, 공개 전환과 어뷰징 근거 연결도 이번 API 승인으로 확정하지 않는다.
 
 ## 실행·후보·결과·검증 응답
 
@@ -92,7 +111,7 @@ AD01~AD07의 업무 ID를 유지하고 검증 이력·실행 시작 및 재개�
 
 ## 당첨 취소와 즉시 재추첨
 
-`AwardCancellationRequest`: 필수 `reason:string`. 관리자가 사유를 기록해 개별 당첨을 취소할 수 있으며 어뷰징·자격 미달 확인을 필수 조건으로 요구하지 않는다. 부정 미확정을 일반 관리자 취소의 거절 조건으로 사용하지 않는다. `abuseCaseId`의 선택적 요청·저장 연계는 후속 확인이며 필수 계약으로 채택하지 않는다. 사유 누락·권한·취소 대상·멱등 충돌 등의 상세 오류 계약은 구현 전에 확인한다.
+`AwardCancellationRequest`: 필수 `reason:string`. 관리자가 사유를 기록해 개별 당첨을 취소할 수 있으며 어뷰징·자격 미달 확인을 필수 조건으로 요구하지 않는다. 부정 미확정을 일반 관리자 취소의 거절 조건으로 사용하지 않는다. `abuseCaseId`의 선택적 요청·저장 연계는 후속 확인이며 필수 계약으로 채택하지 않는다. 사유 길이·권한·HTTP 상태는 위 GD-138 일부 계약 확정 절을 따른다. 오류 코드 문자열 사전과 멱등 키 적용 범위는 추가 확인한다.
 
 `AwardCancellationResult`: `cancellationId:UUID`, `canceledDrawResultId:UUID`, `replacementDrawRunId:UUID`, `status:PREPARING/READY/RUNNING/CONFIRMED/FAILED`, `canceledAt:instant`.
 
