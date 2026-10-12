@@ -86,6 +86,8 @@
 
 `NotificationJobDetail`: NotificationJob 전체 + `lastError:string?`, `sourceJobId:UUID?`, `lastProcessedUserId:UUID?`, `leaseUntil:instant?`. `AdminNotification`: Notification 전체 + `jobId:UUID`, `userId:UUID`, `mockDeliveryStatus:PENDING/SENT/FAILED`, `mockSentAt:instant?`, `deliveryAttemptCount:int`, `nextDeliveryAttemptAt:instant?`, `lastDeliveryError:string?`.
 
-AN03은 생성 작업 실패, AN05는 개별 모의 발송 실패의 재처리다. 재시도로 동일 알림을 복제하거나 읽음 상태를 변경하지 않는다. 최종 실패 여부·허용 재시도 상태의 구체 판정은 담당자의 운영 설정으로 정의한다. 관리자 목록 조회가 타인의 알림 읽음을 대신 처리하지 않는다.
+AN03은 알림 생성의 최종 실패, AN05는 개별 모의 발송의 최종 실패를 복구하는 요청이다. 최초 처리와 최대 3회의 자동 재시도 후 관리자 복구로 전환하는 기준은 [알림 도메인 규칙](../02-domain/notification.md#실패-재시도-및-관리자-복구)을 따른다. 정상 알림의 재발송 기능이 아니며 동일 알림을 복제하거나 읽음 상태를 변경하지 않는다. 관리자 목록 조회가 타인의 알림 읽음을 대신 처리하지 않는다.
+
+실패 처리 정책은 2026-10-12 사용자 확인으로 명확히 했다. 관리자 AN01~AN05의 경로·응답·오류 코드와 구체적인 구현 계약은 계속 검토 대기이며, 이번 정책 확인만으로 API 전체를 확정하지 않는다.
 
 응모권 회수 기능 제외에 따라 신규 TICKET_REVOKED 알림은 생성하지 않는다. 기존 알림의 조회 호환 처리는 담당자가 별도 확인하며 기존 데이터를 삭제하지 않는다.

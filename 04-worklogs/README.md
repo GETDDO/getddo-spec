@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-12 알림 자동 재시도·관리자 실패 복구 정책 명확화](2026-10-12-notification-failure-recovery.md)
+
 - [2026-10-08 관리자 이벤트 응답의 createdBy 제거](2026-10-08-remove-event-created-by.md)
 
 - [2026-10-07 응모권 회수 기능 제외](2026-10-07-exclude-ticket-recovery.md)
