@@ -1,13 +1,13 @@
 # 알림 API 계약
 
-- 상태: 사용자 알림 N01~N03 확정 / 관리자 알림 AN01~AN05 검토 대기
+- 상태: 사용자 알림 N01~N03 확정 / 관리자 알림 AN01~AN05 확정 (2026-10-12)
 - 사용자 알림 확정일: 2026-09-30
 - 확정 근거: 사용자의 현재 구현 기준 N01~N03 및 spec 확정 지시 (GD-65)
 - 공통 계약: [공통 API 계약](common.md) — 문서 전체는 초안이며 N01~N03에 적용하는 계약은 아래에 명시한다.
 - 도메인 규칙: [알림 규칙](../02-domain/notification.md)
 - 주 담당: 전민규 — 사용자 알림·읽음 처리, 비동기 생성·모의 발송·재시도, 관리자 알림 운영
 
-확정된 업무 정책은 연결된 요구사항·도메인 문서를 따른다. 관리자 알림의 경로·메서드·DTO·업무 오류 코드는 담당자 확인 전 제안이다.
+확정된 업무 정책은 연결된 요구사항·도메인 문서를 따른다. 관리자 알림의 경로·메서드·DTO·업무 오류 코드는 2026-10-12 사용자 확인으로 아래 범위를 확정했다.
 
 ## 사용자 알림 — N01~N03 확정
 
@@ -70,24 +70,68 @@
 
 그 밖의 표준 HTTP·입력 오류는 [공통 오류](common.md#오류)의 현행 응답 형식을 따른다. 공통 사용자 처리로 통합할 때에도 확정된 N01~N03 공개 계약과의 호환성을 확인한다.
 
-## 관리자 알림 운영
+## 관리자 알림 운영 — AN01~AN05 확정
 
-| ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
-| --- | --- | --- | --- | --- |
-| AN01 | `GET /admin/notification-jobs` | `page,size,status,notificationType,eventId,from,to` | 200 `Page<NotificationJob>` | 공통 |
-| AN02 | `GET /admin/notification-jobs/{jobId}` | 없음 | 200 `NotificationJobDetail` | 공통 |
-| AN03 | `POST /admin/notification-jobs/{jobId}/retry` | 본문 없음 | 202 `NotificationJob` | 409 재처리 불가 상태 |
-| AN04 | `GET /admin/notifications` | `page,size,userId,eventId,jobId,mockDeliveryStatus,from,to` | 200 `Page<AdminNotification>` | 공통 |
-| AN05 | `POST /admin/notifications/{notificationId}/delivery-retries` | 본문 없음 | 202 `AdminNotification` | 409 재처리 불가 상태 |
+- 확정일: 2026-10-12. 근거: 사용자 GD-72 확인안 및 객관식 추천안 일괄 승인.
+- 아래 경로는 `/api/v1`을 포함한 실제 경로다. 활성(`ACTIVE`) 관리자(`ADMIN`)만 사용할 수 있다.
+- 기존 공통 사용자 문맥을 사용한다. `X-User-ID`, `X-User-Role`은 필수이며 DB 값과 대조한다. 멤버십은 필수가 아니며 선택 헤더를 전달하면 DB 값과 대조한다. 시연용 사용자 헤더를 실제 신원 인증으로 사용하지 않는다.
+- 성공·실패는 기존 `ResponseEnvelope` 봉투를 사용한다. 날짜·시각은 UTC ISO-8601, UUID는 문자열이다. 아래 필드는 항상 반환하고 `?` 필드는 없으면 null이다.
 
-`NotificationJob`: `id:UUID`, `eventId:UUID?`, `publicationId:UUID?`, `targetUserId:UUID?`, `notificationType:NotificationType`, `status:PENDING/PROCESSING/COMPLETED/FAILED`, `attemptCount:int`, `scheduledAt:instant`, `nextAttemptAt:instant?`, `createdAt:instant`, `completedAt:instant?`.
+| ID | 메서드·경로 | 요청 | 성공 data |
+| --- | --- | --- | --- |
+| AN01 | `GET /api/v1/admin/notification-jobs` | 선택 page,size,status,notificationType,eventId,from,to | 200 Page<NotificationJob> |
+| AN02 | `GET /api/v1/admin/notification-jobs/{jobId}` | UUID 경로 | 200 NotificationJobDetail |
+| AN03 | `POST /api/v1/admin/notification-jobs/{jobId}/retry` | UUID 경로, 본문 없음 | 202 NotificationJob |
+| AN04 | `GET /api/v1/admin/notifications` | 선택 page,size,userId,eventId,jobId,mockDeliveryStatus,from,to | 200 Page<AdminNotification> |
+| AN05 | `POST /api/v1/admin/notifications/{notificationId}/delivery-retries` | UUID 경로, 본문 없음 | 202 AdminNotification |
 
-`NotificationType`: `EVENT_START`, `RESULT_PUBLISHED`, `ENTRY_EXCLUDED`, `EVENT_SCHEDULE_CHANGED`, `EVENT_CANCELED`, `RESULT_CHANGED`.
+### 목록 조회
 
-`NotificationJobDetail`: NotificationJob 전체 + `lastError:string?`, `sourceJobId:UUID?`, `lastProcessedUserId:UUID?`, `leaseUntil:instant?`. `AdminNotification`: Notification 전체 + `jobId:UUID`, `userId:UUID`, `mockDeliveryStatus:PENDING/SENT/FAILED`, `mockSentAt:instant?`, `deliveryAttemptCount:int`, `nextDeliveryAttemptAt:instant?`, `lastDeliveryError:string?`.
+- page 기본 1, 1 이상. size 기본 20, 1~100. 정렬은 createdAt DESC, id DESC다.
+- Page는 items, page, size, totalElements다. 결과가 없거나 마지막 페이지를 넘으면 빈 목록을 반환한다.
+- from/to는 생성 시각의 [from,to) 범위다. 한쪽만 전달할 수 있고 둘 다 전달하면 from < to여야 한다. 시각 입력은 Z 또는 오프셋을 포함한다.
+- 상태·유형은 아래 enum의 대문자 값을 사용한다. 알림 조회는 읽음 상태를 변경하지 않는다.
 
-AN03은 알림 생성의 최종 실패, AN05는 개별 모의 발송의 최종 실패를 복구하는 요청이다. 최초 처리와 최대 3회의 자동 재시도 후 관리자 복구로 전환하는 기준은 [알림 도메인 규칙](../02-domain/notification.md#실패-재시도-및-관리자-복구)을 따른다. 정상 알림의 재발송 기능이 아니며 동일 알림을 복제하거나 읽음 상태를 변경하지 않는다. 관리자 목록 조회가 타인의 알림 읽음을 대신 처리하지 않는다.
+### 응답
 
-실패 처리 정책은 2026-10-12 사용자 확인으로 명확히 했다. 관리자 AN01~AN05의 경로·응답·오류 코드와 구체적인 구현 계약은 계속 검토 대기이며, 이번 정책 확인만으로 API 전체를 확정하지 않는다.
+`NotificationJob`: id:UUID, eventId:UUID?, publicationId:UUID?, notificationType:NotificationType,
+status:PENDING/PROCESSING/COMPLETED/FAILED, attemptCount:int, scheduledAt:instant,
+nextAttemptAt:instant?, createdAt:instant, completedAt:instant?, generationStoppedBy:string?, retryable:boolean.
 
-응모권 회수 기능 제외에 따라 신규 TICKET_REVOKED 알림은 생성하지 않는다. 기존 알림의 조회 호환 처리는 담당자가 별도 확인하며 기존 데이터를 삭제하지 않는다.
+`NotificationJobDetail`: NotificationJob 필드 + lastError:string?, sourceJobId:UUID?, lastProcessedUserId:UUID?, leaseUntil:instant?.
+
+`AdminNotification`: id:UUID, jobId:UUID, userId:UUID, eventId:UUID?, title:string, body:string,
+linkUrl:string?, createdAt:instant, isRead:boolean, mockDeliveryStatus:PENDING/SENT/FAILED,
+mockSentAt:instant?, deliveryAttemptCount:int, nextDeliveryAttemptAt:instant?, lastDeliveryError:string?, retryable:boolean.
+
+- notificationType은 EVENT_START, RESULT_PUBLISHED, ENTRY_EXCLUDED, EVENT_SCHEDULE_CHANGED, EVENT_CANCELED, RESULT_CHANGED다. 과거 타입의 조회 지원은 신규 제외 알림 발생 기능을 의미하지 않는다.
+- 초안의 targetUserId는 실제 작업의 다중 수신자 구조에 맞지 않아 제거했다. 전체 수신자 목록·개인정보는 응답에 추가하지 않는다.
+- attemptCount와 deliveryAttemptCount는 누적 처리 차수이며 수동 복구 때 0으로 초기화하지 않는다.
+- generationStoppedBy가 있으면 중지된 생성 작업이다. status가 PENDING/PROCESSING이어도 실행·복구 대상이 아니다.
+- retryable은 조회 시점의 복구 가능 여부다. 접수 시에는 상태·이벤트 조건을 다시 확인한다.
+
+### 복구 접수
+
+- AN03은 생성 최종 실패, AN05는 개별 모의 발송 최종 실패의 복구다. 실패 판정·자동 재시도·시점이 지난 시작 안내의 제한은 [알림 도메인 규칙](../02-domain/notification.md#실패-재시도-및-관리자-복구)을 따른다.
+- FAILED이며 다음 자동 재시도가 없는 건만 접수한다. 생성 작업은 중지되지 않아야 하며 유효한 진행 중 선점이 없어야 한다.
+- 시작 안내 생성 복구는 미삭제·진행 예정·시작 전 이벤트만 허용한다. 다른 알림이나 이미 생성된 알림의 모의 발송에 이 시간 제한을 확대하지 않는다.
+- 202는 워커 처리 접수이며 최종 성공을 의미하지 않는다. 기존 수신자·내용·알림 ID·읽음 상태를 보존한다.
+- 같은 최종 실패의 동시 복구는 하나만 접수한다. 뒤 요청과 이미 접수된 건의 반복 요청은 409로 거절한다. 새 복구 구간이 다시 최종 실패하면 별도 수동 복구를 요청할 수 있다.
+- 접수한 관리자·대상·변경 전후 상태 및 처리 차수를 공통 감사 기록에 남긴다. 복구 접수와 감사 기록은 함께 성공·롤백한다.
+
+### 오류
+
+| HTTP | 코드 | 조건 |
+| --- | --- | --- |
+| 400 | COMMON-005 | UUID·enum·시각·숫자 형식 오류 |
+| 400 | NOTIFICATION-007 | 페이지·크기 범위 또는 기간 순서 오류 |
+| 401 | USER-003 | 필수 사용자·역할 헤더 누락 |
+| 401 | USER-002 | 미등록 사용자 |
+| 403 | USER-004 | 헤더 역할과 DB 역할 불일치 |
+| 409 | USER-006 | 선택 멤버십과 DB 값 불일치 |
+| 403 | NOTIFICATION-008 | 일반 사용자 또는 비활성 관리자 |
+| 404 | NOTIFICATION-009 | 없는 작업·알림 |
+| 409 | NOTIFICATION-010 | 최종 실패가 아님, 중지·시점 경과 또는 이미 복구 접수됨 |
+| 500 | COMMON-001 | 예상하지 못한 서버 오류 |
+
+응모권 회수 기능 제외에 따라 신규 TICKET_REVOKED 알림은 생성하지 않는다. 이번 계약은 기존 데이터 삭제를 요구하지 않는다.
