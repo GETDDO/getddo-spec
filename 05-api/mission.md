@@ -66,6 +66,12 @@
 - M02는 `MissionSummary` 필드에 `description`과 `questions`를 더한다. 문항은 퀴즈와 설문을 같은 모양으로 `displayOrder` 오름차순이며, 퀴즈 문항의 `required`는 모든 문항을 맞혀야 완료하므로 항상 true이다. 사용자 응답에는 `correctAnswer`와 선택지의 정답 여부를 싣지 않는다. 없는 미션은 404 `MISSION-003`이다.
 - 페이지 번호나 크기가 범위를 벗어나거나 `missionType`이 알 수 없는 값이면 400이다.
 
+**현행 구현 범위(백엔드 GD-176, M04)**:
+
+- M04는 `page`(1부터, 기본 1)·`size`(1~100, 기본 20)를 받아 요청 사용자가 해당 미션에 낸 제출을 최신순(`createdAt` 내림차순, 같으면 ID 내림차순)으로 돌려준다. 없는 미션은 404 `MISSION-003`이고 제출이 없으면 빈 페이지다.
+- 항목은 M03의 `MissionSubmissionResult`와 같은 필드이며 `receivedAt`과 `createdAt`은 같다. 오답 제출도 `isCompleted=false`, `reward=null`인 정상 결과로 포함하고, 완료한 제출에만 응모권 서비스가 확정한 `reward`가 붙는다. 제출한 답변과 정답은 응답에 싣지 않는다.
+- 페이지 번호나 크기가 범위를 벗어나면 400이다.
+
 ## 관리자 미션·문항
 
 | ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
