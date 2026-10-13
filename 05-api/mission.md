@@ -59,6 +59,13 @@
 - `MissionSubmissionResult.reward`는 완료 때만 있고 응모권 서비스가 확정한 값이다: `ticketCount`(1), `grade`(`BRONZE`·`SILVER`·`GOLD`), `grantedAt`, `expiresAt`. 완료 보상은 사용자·미션당 한 번이며, 제출·정답 진행·보상 청구·응모권 지급은 한 트랜잭션으로 확정되거나 모두 취소된다. `createdAt`은 서버가 제출을 받은 시각으로 `receivedAt`과 같다.
 - 요청 빈도 제한(429)은 후속 작업(GD-146)이다. 사용자 문항 응답에서 정답 필드를 제외하는 것은 조회 API(M02) 구현 때 다룬다.
 
+**현행 구현 범위(백엔드 GD-174, M01·M02)**:
+
+- M01은 `page`(1부터, 기본 1)·`size`(1~100, 기본 20)·`missionType`을 받는다. 운영 상태나 기간으로 거르지 않고 `ACTIVE`·`ENDED` 미션을 모두 시작 시각 내림차순(같으면 ID 내림차순)으로 돌려주므로 진행 여부는 `startsAt`·`endsAt`로 판단한다. `DRAFT`는 스키마에 없다. `completed`는 요청한 사용자의 완료 제출이 있는지로 정한다.
+- `rewardTicketCount`는 미션 보상이 항상 응모권 1장이라 1로 고정이며 지급 등급은 완료할 때 정해진다. `imageUrl`은 이미지 저장소가 정해지기 전이라 현재 항상 null이다.
+- M02는 `MissionSummary` 필드에 `description`과 `questions`를 더한다. 문항은 퀴즈와 설문을 같은 모양으로 `displayOrder` 오름차순이며, 퀴즈 문항의 `required`는 모든 문항을 맞혀야 완료하므로 항상 true이다. 사용자 응답에는 `correctAnswer`와 선택지의 정답 여부를 싣지 않는다. 없는 미션은 404 `MISSION-003`이다.
+- 페이지 번호나 크기가 범위를 벗어나거나 `missionType`이 알 수 없는 값이면 400이다.
+
 ## 관리자 미션·문항
 
 | ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
