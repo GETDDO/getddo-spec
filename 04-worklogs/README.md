@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-14 이벤트 연결 배너 수동 삭제 정책 최신화](2026-10-14-manual-banner-deletion.md)
+
 - [2026-10-12 게임별 최소 보상 점수 반영](2026-10-12-game-reward-minimum-score.md)
 - [2026-10-12 사용자 문맥 헤더 `X-User-Role` 충돌 정리와 결정](2026-10-12-user-context-header-decision.md)
 

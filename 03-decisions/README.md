@@ -1,5 +1,7 @@
 # 공용 결정 기록
 
+- [ADR-021: 이벤트 연결 배너의 관리자 수동 삭제](021-manual-banner-deletion.md) — 채택, ADR-012의 배너 정책 부분 대체
+
 - [ADR-020: 게임별 최소 보상 점수](020-game-reward-minimum-score.md) — 채택
 
 - [ADR-017: 부정 획득 응모권 회수 기능 제외](017-exclude-ticket-recovery.md) — 제안
