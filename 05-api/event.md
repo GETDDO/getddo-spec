@@ -15,7 +15,7 @@
 
 | DTO | 필드 |
 | --- | --- |
-| `EventSummary` | `id:UUID`, `title:string`, `imageUrl:string?`, `eventType:NO_TICKET/TICKET`, `weightingEnabled:boolean`, `membershipRule:excellent/vip/vvip`, `startsAt:instant`, `endsAt:instant`, `status:EventStatus`, `publicationScheduledAt:instant`, `serverTime:instant` |
+| `EventSummary` | `id:UUID`, `title:string`, `imageUrl:string?`, `eventType:NO_TICKET/TICKET`, `weightingEnabled:boolean`, `membershipRule:excellent/vip/vvip`, `startsAt:instant`, `endsAt:instant`, `status:EventStatus`, `serverTime:instant` |
 | `EventDetail` | EventSummary 전체 + `description:string`, `maxTicketsPerUser:int?`, `prizes:Prize[]` |
 | `Prize` | `id:UUID`, `rank:int`, `name:string`, `description:string?`, `imageUrl:string?`, `winnerCount:int` |
 
@@ -23,7 +23,7 @@
 
 ## 관리자 이벤트 등록·운영
 
-권한 A. 이벤트 CRUD는 박지훈, 상태 운영·배너는 전민규, 반환은 윤태형, 추첨 차단은 석종수와 협의한다.
+권한 A. 이벤트 CRUD·시작/마감 상태 전환·취소는 박지훈, 배너는 전민규, 반환은 윤태형, 추첨·수동 공개와 해당 상태 연결은 석종수와 협의한다.
 
 | ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
 | --- | --- | --- | --- | --- |
@@ -76,11 +76,21 @@ PUT은 수정 가능한 설정 전체를 전달한다. 기존 경품은 ID를 �
 
 월말 소진용 이벤트는 별도 구분 필드 없이 `eventType=TICKET`, `weightingEnabled=true`, `maxTicketsPerUser=null` 조합으로 표현한다. `NO_TICKET`의 `maxTicketsPerUser=null`과는 `eventType`으로 구분한다. 서버는 이벤트 유형·가중치 여부·상한값 조합을 검증한다. 월말 소진용 이벤트의 지정 주체와 허용 조건은 담당자가 정한다.
 
-`AdminEvent`: EventDetail 전체 + `imageKey:string?`, `createdAt:instant`, `updatedAt:instant`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
+`AdminEvent`: EventDetail 전체 + `drawScheduledAt:instant`, `imageKey:string?`, `createdAt:instant`, `updatedAt:instant`, `canceledAt:instant?`, `prizeImages:{prizeId:UUID,imageKey:string?}[]`. 관리자에게 운영 상태를 보여준다.
 
 수정은 시작 전 **SCHEDULED**에서만 허용하고, 현재 설정된 시작 시각보다 앞당길 수 없다. 취소 상태는 시작 전이어도 수정할 수 없다. 진행·마감 후에는 제목·이미지도 수정할 수 없다. 수정 시 시작 알림 예약과 필요한 변경 알림을 연동한다.
 
 삭제는 시작 전이고 응모 이력이 없을 때만 가능하다. 배너는 자동 삭제하지 않으며 관리자가 별도로 수동 삭제한다. 이미 생성된 알림 전체를 삭제한다는 정책은 최신 ADR에서 철회되었으므로 임의로 삭제하거나 반드시 보존한다고 확정하지 않는다. 삭제 이벤트의 기존 알림 처리 방식은 담당자 계약에 따른다.
+
+### 추첨 시각과 발표 시각 구분 — 2026-10-15
+
+- 변경 전: 이벤트 목록·상세·관리자 응답에 `publicationScheduledAt`을 포함해 마감 +5분을 발표 예정 시각으로 표현했다.
+- 변경 후: `publicationScheduledAt`을 모든 이벤트 응답에서 제외한다. 사용자 목록·상세는 추첨/발표 예정 시각이나 카운트다운을 제공하지 않고 마감 후 실제 공개 전까지 결과 발표 대기를 표시한다.
+- 관리자에게만 `drawScheduledAt`을 제공한다. 값은 `endsAt +5분`의 최초 자동 추첨 기준 시각이며 실제 추첨 실행·명단 확인·결과 공개가 완료됐다는 의미가 아니다. 취소·삭제·장애 등으로 실제 실행이 없거나 늦을 수 있다.
+- 마감 +5분 자동 추첨은 유지한다. 관리자 확인·승인과 실제 수동 공개를 구분하며 시간 경과나 확인만으로 공개하지 않는다.
+- 실제 공개 여부와 `publishedAt`은 [사용자 결과 조회 계약](drawing.md#공개-결과와-본인-결과)을 따른다. 이벤트 응답에 추정 발표 시각을 다시 만들지 않는다.
+
+근거는 [이벤트 규칙](../02-domain/event.md#상태-관리), [수동 최초 공개 결정](../03-decisions/022-manual-initial-publication.md)과 [GD-203 작업 기록](../04-worklogs/2026-10-15-gd203-event-time-contract.md)을 따른다. 이 절은 응답 계약의 변경이며 BE 코드 병합·배포 완료를 의미하지 않는다. 프론트는 기존 필드를 제거하고 관리자에서만 새 필드를 사용하도록 연동한다.
 
 ## 상태 운영
 
