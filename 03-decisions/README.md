@@ -26,6 +26,8 @@
 
 - [ADR-009: 응모 마감 후 5분 검토 및 자동 최초 발표](009-five-minute-auto-publication.md)
 
+- [ADR-023: 배너의 이벤트 연결·관리 순서·이미지 주소 분리](023-banner-event-order-image-url.md) — 채택
+
 ## 작성 대상
 
 - 여러 기능이나 코드 저장소에 영향을 주는 결정
