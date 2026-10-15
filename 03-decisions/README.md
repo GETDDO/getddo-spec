@@ -1,5 +1,7 @@
 # 공용 결정 기록
 
+- [ADR-024: 감사 기록 유지와 공통 감사 조회 제외](024-audit-recording-without-query.md) — 제안 / 사용자 정책 결정 반영·문서 검토 대기
+
 - [ADR-022: 자동 추첨과 관리자 수동 최초 공개](022-manual-initial-publication.md) — 제안 / 사용자 정책 확정·문서 검토 대기
 
 - [ADR-021: 이벤트 연결 배너의 관리자 수동 삭제](021-manual-banner-deletion.md) — 채택, ADR-012의 배너 정책 부분 대체

@@ -19,6 +19,6 @@
 | [어뷰징](abuse.md) | AR01~AR02, AR07 (AR03 제외, AR06 후속 검토, AR04·AR05 제외) | 차단 내역 조회·사후 무효화 후속 |
 | [알림](notification.md) | N01~N03, AN01~AN05 | 사용자 알림·관리자 발송 이력 |
 | [배너](banner.md) | B01, AB01~AB05 | 배너 조회·관리 |
-| [감사](audit.md) | AU01~AU02 | 관리자 감사 조회 |
+| [감사 기록](audit.md) | 외부 API 없음 | 내부 기록 유지·공통 조회 제외 |
 
 DB 대응, 저장 방식, 내부 처리와 구현 검증 항목은 [백엔드 API 문서](https://github.com/GETDDO/getddo-be/tree/dev/docs/02-api)와 [DB 문서](https://github.com/GETDDO/getddo-be/tree/dev/docs/03-database)에서 관리한다. 담당자 판단이 필요한 도메인 정책은 [미결정 사항](../00-requirements/pending-decisions.md)을 따른다.

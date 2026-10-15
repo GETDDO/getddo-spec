@@ -1,48 +1,60 @@
-# 감사 로그 API
+# 감사 기록 명세
 
-- 상태: AU01/AU02 상세 계약 사용자 확인 완료 (2026-10-15)
-- 공통 계약: [공통 API 계약](common.md)
+- 상태: 2026-10-15 사용자 결정 — 감사 기록 유지, 공통 감사 조회 제외
+- 적용 범위: [구현 범위](../00-requirements/scope.md), [ADR-024](../03-decisions/024-audit-recording-without-query.md)
 
-2026-10-15 사용자는 아래 상세 계약과 확인된 변경 필드 공개, spec main 게시·Jira 작업 생성·구현을 확인했다. 확정된 업무 정책은 연결된 요구사항·도메인 문서를 따른다.
+감사는 업무 처리의 변경 근거를 내부에 남기는 기능이다. 관리자가 공통 감사 로그를 검색하거나 목록·상세로 조회하는 API와 전용 화면은 이번 버전에서 제공하지 않는다.
 
-| ID | 메서드·경로 | 요청 | 성공 | 주요 오류 |
-| --- | --- | --- | --- | --- |
-| AU01 | `GET /admin/audit-logs` | `page,size,actorId,action,targetType,targetId,from,to` | 200 `Page<AuditLogSummary>` | 공통 |
-| AU02 | `GET /admin/audit-logs/{auditLogId}` | 없음 | 200 `AuditLogDetail` | 공통 |
+## 제공 범위
 
-`AuditLogSummary`: `id:UUID`, `actorId:UUID?`, `action:string`, `targetType:string`, `targetId:UUID`, `reason:string?`, `requestId:string?`, `createdAt:instant`.
-
-`AuditLogDetail`: Summary 전체 + `beforeData:object?`, `afterData:object?`. 상세 데이터는 관리자가 검토할 변경 근거에 한정하고 비밀값·무관한 개인정보를 기록하거나 응답하지 않는다. 감사 로그 수정·삭제 API는 제공하지 않는다.
-
-
-## 목록·상세 계약
-
-- 실제 경로는 `/api/v1/admin/audit-logs`와 `/api/v1/admin/audit-logs/{auditLogId}`다. 공통 DB 사용자 문맥의 ACTIVE ADMIN만 조회한다. 선택 멤버십 헤더도 기존 공통 대조를 따른다.
-- page 기본 1·1 이상, size 기본 20·1~100이다. 정렬은 createdAt DESC·id DESC, totalElements는 필터 전체 건수다. 빈 결과·범위 밖 페이지는 빈 items로 반환한다.
-- actorId·targetId는 정확한 UUID 검색, action·targetType은 코드 일치 검색이며 모든 전달 조건을 AND로 적용한다. 문자열 필터는 양끝 공백을 제거하고 빈 값은 해당 필터 없음으로 처리한다. 길이는 기존 기록 코드와 같은 최대 60자다. action/targetType의 현재 코드 예시는 아래 공개 필드 표를 따르며 목록 검색에서 알려지지 않은 코드를 임의로 거절하지 않는다.
-- 기간은 createdAt의 UTC `[from,to)`다. 양끝은 선택이며 둘 다 있으면 from < to다. MySQL DATETIME(6)에서 다룰 수 있는 UTC 범위를 벗어난 조건은 거절한다. FE의 KST 날짜 입력은 UTC 경계로 바꿔 전달한다.
-- 성공은 HTTP 200·기존 응답 봉투이며 목록은 Page<AuditLogSummary>, 상세는 AuditLogDetail이다. 시스템 기록 actorId와 저장되지 않은 reason/requestId는 null을 유지한다.
-- UUID·시각·숫자 타입 해석 오류는 400 COMMON-005다. 페이지/크기·문자열 길이·기간 조건 위반은 400 AUDIT-001(`감사 로그 조회 조건이 올바르지 않습니다.`), 호출자 자격 위반은 403 AUDIT-002(`활성 관리자만 감사 로그를 조회할 수 있습니다.`), 없는 상세는 404 AUDIT-003(`감사 로그를 찾을 수 없습니다.`)이다. 기존 사용자 식별·헤더 대조 오류는 그대로 유지한다.
-
-## 변경 전후 정보의 공개 범위
-
-변경 전: 전후 JSON 공개 필드가 초안에서 구체화되지 않았다. 변경 후: 사용자가 **현재 확인된 업무 필드만 공개**하는 방식을 선택했다. 저장 원본은 변경하지 않고 조회 응답에서 필드를 선택한다. 아래 작업·대상 조합에 실제 존재하며 예상 형식에 맞는 필드만 공개한다.
-
-| action | targetType | beforeData/afterData 공개 가능 필드 |
+| 항목 | 이번 버전 | 설명 |
 | --- | --- | --- |
-| EVENT_CANCEL | EVENT | status,canceledAt,refundedTicketCount |
-| EVENT_DELETE | EVENT | deletedAt |
-| NOTIFICATION_JOB_RETRY | NOTIFICATION_JOB | status,attemptCount,attemptBase |
-| NOTIFICATION_DELIVERY_RETRY | NOTIFICATION | status,attemptCount,attemptBase |
-| DRAW_EXECUTE / DRAW_RESUME | DRAW_RUN | status,attemptId |
-| AWARD_CANCEL | DRAW_RESULT | isCanceled,cancellationId,replacementRunId |
+| 업무 변경 감사 기록 | 유지 | 각 업무가 처리자·대상·필요한 변경 전후 정보와 사유를 기록 |
+| 시스템 처리 감사 기록 | 유지 | 사용자 처리자가 없는 시스템 작업은 처리자 ID를 null로 기록 |
+| 공통 감사 목록·검색 AU01 | 제외 | `/api/v1/admin/audit-logs` 제공하지 않음 |
+| 공통 감사 상세 AU02 | 제외 | `/api/v1/admin/audit-logs/{auditLogId}` 제공하지 않음 |
+| 공통 감사 전용 조회 화면 | 제외 | FE가 위 API를 연동하는 작업도 제외 |
+| 감사 수정·삭제 API | 미제공 유지 | 이번 변경으로 과거 기록을 수정·삭제하지 않음 |
+| 기존 감사 테이블·데이터 | 유지 | 조회 제외를 이유로 테이블이나 저장된 이력을 삭제하지 않음 |
+| 개별 업무의 운영 내역 조회 | 기존 계약 유지 | 추첨 실패·확인·공개·취소 이력 등은 해당 업무 계약을 따름 |
 
-- 상태는 해당 업무의 기존 상태 코드, 횟수는 음수가 아닌 정수, 반환 수량은 음수가 아닌 정수 수량, 시각은 instant, ID는 UUID, isCanceled는 boolean으로 해석 가능한 값만 공개한다. 허용하지 않은 키·중첩 객체·예상 형식이 아닌 값은 제외한다.
-- 전후 데이터 자체의 null과 허용된 키의 JSON null은 보존한다. 알려지지 않은 작업/대상 조합 또는 공개 가능한 필드가 없는 데이터는 null로 응답한다. 새 업무 필드의 공개는 담당 기능과 확인한 뒤 확장한다.
-- 연락처·토큰·원문 요청·임의 JSON 전체를 공개하지 않는다. 상세가 존재해도 일부 변경 데이터가 공개되지 않을 수 있으며 이를 원본 삭제로 해석하지 않는다.
+AU01/AU02의 페이지·필터·정렬·공개 JSON·AUDIT-001~003 오류 계약은 철회한다. 이 문서에 기존 경로를 남긴 것은 제외 범위를 식별하기 위한 것이며 제공 API 목록이 아니다.
 
-## 담당 경계와 연결
+## 기록 항목
 
-- A의 기록 기반과 각 업무의 실제 감사 기록을 재사용한다. C는 새 읽기 계약·조회 구현을 담당하고 기존 기록·인증 동작을 변경하지 않는다. FE의 실제 화면 연결은 담당자와 진행한다.
-- 기존 FE의 `/admin/audit-logs` 호출은 baseURL에 따른 `/v1` 접두사 확인이 필요하다. 과거 action/targetType 선택지도 실제 기록 코드에 맞춰 연결한다. 기존 시연 데이터나 화면을 계약 채택만으로 수정하지 않는다.
-- 감사 기록은 업무 트랜잭션과 함께 롤백된다. 이 조회는 보존된 감사 기록을 읽으며, 롤백된 실패 시도의 전체 이력을 대신 제공하지 않는다. 추첨 실패 내역의 추가 조회 계약은 별도 후속 사항을 따른다.
+| 항목 | 자료형 | 의미·조건 |
+| --- | --- | --- |
+| id | UUID | 감사 기록 ID. 저장 시 서버가 발급 |
+| actorId | UUID 또는 null | 검증된 사용자 문맥의 처리자 ID. 시스템 작업은 null |
+| action | 문자열 | 수행한 업무 코드. 필수·공백 불가·최대60자 |
+| targetType | 문자열 | 변경 대상 종류. 필수·공백 불가·최대60자 |
+| targetId | UUID | 변경 대상 ID. 필수, 대상 유효성은 해당 업무가 확인 |
+| beforeData | JSON 객체 또는 null | 변경 전 필요한 최소 정보 |
+| afterData | JSON 객체 또는 null | 변경 후 필요한 최소 정보 |
+| reason | 문자열 또는 null | 처리 사유. 필수 여부는 해당 업무 계약을 따름 |
+| requestId | 문자열 또는 null | 요청 추적 ID. 최대100자, 중복 방지 키가 아님 |
+| createdAt | UTC instant | 서버 기준 기록 생성 시각 |
+
+위 표는 내부 기록 항목이며 외부 응답 DTO가 아니다. 기록할 필드는 업무 담당자가 선택하고 토큰·비밀값·원문 요청·무관한 개인정보는 남기지 않는다. 공통 저장 기능이 개인정보를 자동으로 제거한다고 가정하지 않는다.
+
+## 저장 규칙과 담당 경계
+
+| 항목 | 규칙 |
+| --- | --- |
+| 저장 시점 | 해당 업무 변경과 같은 트랜잭션에서 기록 |
+| 성공 | 업무 변경과 감사 기록을 함께 확정 |
+| 업무·감사 저장 실패 | 실패를 숨기지 않고 해당 트랜잭션을 함께 롤백 |
+| 롤백된 실패 시도 | 현재 감사 기록으로 전체 실패 시도를 보존한다고 보장하지 않음 |
+| 동일 요청의 중복 방지 | 해당 업무가 처리하며 requestId만으로 중복 기록을 막지 않음 |
+| A 공통 기반 | 기존 감사 기록 저장 기반을 유지 |
+| 각 업무 담당자 | 기록 시점·처리자·대상·최소 변경 정보·실제 호출을 관리 |
+| C 공통 감사 조회 | 이번 버전에서 구현·연동하지 않음 |
+| 구현·검증 방법 | BE의 [감사 기록 문서](https://github.com/Uplus-GETDDO/getddo-be/blob/dev/docs/02-api/audit-recording.md)에서 관리 |
+
+## 변경 내역
+
+| 변경 전 | 변경 후 | 근거 |
+| --- | --- | --- |
+| AU01/AU02 공통 감사 조회 제공 | 목록·검색·상세 API와 전용 화면 제외 | 2026-10-15 사용자 요청 |
+| 조회 응답에 확인한 전후 JSON 필드 공개 | 공통 조회 응답·공개 필드 계약 철회 | 조회 기능 제외 |
+| 업무와 함께 감사 기록 저장 | 동일하게 유지 | 조회 제외와 기록 저장은 별개 |
