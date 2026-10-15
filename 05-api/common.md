@@ -77,7 +77,7 @@
 | 409 | `STATE_CONFLICT`, `IDEMPOTENCY_CONFLICT`, `ALREADY_ENTERED`, `TICKET_LIMIT_EXCEEDED`, `INSUFFICIENT_TICKETS`, `EVENT_NOT_OPEN`, `MISSION_NOT_OPEN` | 제안 |
 | 400·403·404·409 | 응모 `ENTRY-001`~`ENTRY-009`: 001 요청 형식 오류(400), 002 `ADMIN_ENTRY_FORBIDDEN`(403), 003 `ENTRY_MEMBERSHIP_NOT_MET`(403), 004 `EVENT_NOT_FOUND`(404), 005 `EVENT_NOT_OPEN`(409), 006 `ALREADY_ENTERED`(409), 007 `TICKET_LIMIT_EXCEEDED`(409), 008 `BRONZE_REQUIRED`(409), 009 `IDEMPOTENCY_CONFLICT`(409). 등급별 보유 부족은 응모권 `TICKET-006`(409) | 현행 코드(백엔드 GD-134), 위 제안 이름과 같은 이름 |
 | 400·404·409 | 미션 `MISSION-001`~`MISSION-005`: 001 미션 구성 오류(400, 등록용), 002 답변 형식 오류(400: 미션에 없는 문항·선택지, 문항 유형과 맞지 않는 답변, 같은 문항 중복, 설문 필수 문항 누락, 처리할 답변 없음), 003 `MISSION_NOT_FOUND`(404), 004 `MISSION_NOT_OPEN`(409), 005 `IDEMPOTENCY_CONFLICT`(409). 응모권 지급 오류는 `TICKET-xxx` | 현행 코드(백엔드 GD-175), 위 제안 이름과 같은 이름 |
-| 429 | `COMMON-006` `RATE_LIMIT_EXCEEDED`와 `Retry-After` | 현행 코드(백엔드 GD-146): 응모 E04(사용자 분당 20회·같은 이벤트 분당 10회), 출석 AT02(분당 5회), 미션 제출 M03(분당 20회·같은 미션 분당 5회)에 적용. 사용자 `X-User-ID` 기준 1분 고정 창이고 `Retry-After`는 남은 초이며 CORS로 노출한다. 게임 결과 제출은 게임 담당과 협의 후 적용. 수치는 운영 설정값 |
+| 429 | `COMMON-006` `RATE_LIMIT_EXCEEDED`와 `Retry-After` | 현행 코드(백엔드 GD-146): 응모 E04(사용자 분당 20회·같은 이벤트 분당 10회), 출석 AT02(분당 5회), 미션 제출 M03(분당 20회·같은 미션 분당 5회)에 적용. 사용자 `X-User-ID` 기준 1분 고정 창이고 `Retry-After`는 남은 초이며 CORS로 노출한다. 게임 결과 제출(G04)은 정책 `game-result`(분당 10회)를 정의했고 게임 API 컨트롤러가 생기면 어노테이션으로 적용. 수치는 운영 설정값 |
 
 최종 업무 오류 번호·공개 메시지는 담당자가 정의한다. 아래 API의 오류 열은 공통 400·인증·권한·404·500 외의 주요 분기다. 빈도 제한 수치는 담당자 운영값이며 기능 적용 자체는 확정이다. 탐지 수치, 내부 어뷰징 근거, 예외 원문을 사용자 오류에 넣지 않는다.
 
