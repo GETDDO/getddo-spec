@@ -47,7 +47,7 @@
 | `Page<T>` | `page` 기본 1, `size` 기본 20·범위 1~100 | `items:T[]`, `page:int`, `size:int`, `totalElements:long` |
 | `Cursor<T>` | 최초 `cursor` 생략, 이후 `nextCursor` 사용; `size` 기본 20·범위 1~100 | `items:T[]`, `nextCursor:string?`, `totalElements:long` |
 
-페이지는 **1부터** 시작한다. 크기 기본값·상한은 이 문서의 제안이며 core 모델이 정한 값은 아니다. `totalPages`, `hasNext`는 이 계약의 응답 필드가 아니다. 기본 정렬은 별도 기재가 없으면 `createdAt DESC, id DESC`; 커서는 동일 정렬을 고정하고 불투명 문자열로 전달한다. 기간 필터 `from`, `to`는 선택 `instant`이며 `[from,to)`를 적용한다. 표의 조회 필터는 별도 필수 표시가 없으면 모두 선택이다.
+페이지는 **1부터** 시작한다. 크기 기본값·상한은 이 문서의 제안이며 core 모델이 정한 값은 아니다. `totalPages`, `hasNext`는 이 계약의 응답 필드가 아니다. 기본 정렬은 별도 기재가 없으면 `createdAt DESC, id DESC`; 커서는 동일 정렬을 고정하고 불투명 문자열로 전달한다. 기간 필터 `from`, `to`는 별도 기재가 없으면 선택 `instant`이며 `[from,to)`를 적용한다. [관리자 이벤트 기간 검색](event.md#관리자-이벤트-기간-검색)은 KST `date` 양끝 포함 규칙을 따른다. 표의 조회 필터는 별도 필수 표시가 없으면 모두 선택이다.
 
 ## 중복 요청
 

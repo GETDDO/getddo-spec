@@ -32,16 +32,27 @@
 | AE03 | `POST /admin/events` | `EventWriteRequest` | 201 `AdminEvent` | 400 기간·경품·조건 오류 |
 | AE04 | `PUT /admin/events/{eventId}` | `EventWriteRequest` | 200 `AdminEvent` | 409 수정 불가 상태·시작 앞당김 |
 | AE05 | `DELETE /admin/events/{eventId}` | 없음 | 200 `null` | 409 시작/응모 이력 존재, 삭제 이벤트의 알림 처리 계약 |
-| AE08 | `POST /admin/events/{eventId}/cancel` | `ReasonRequest` | 200 `EventOperationResult` | 반환 실패 시 성공 금지 |
+| AE08 | `POST /admin/events/{eventId}/cancel` | `ReasonRequest` | 200 `EventOperationResult` | 400 취소 사유 오류, 409 `EVENT-017` 이미 취소됨, 반환 실패 시 성공 금지 |
 
 AE06·AE07은 이벤트 일시 중단·재개 기능 제외에 따라 사용하지 않는다. 기존 AE08 식별자는 유지한다.
+
+### 관리자 이벤트 기간 검색
+
+AE01의 `from`, `to`는 각각 선택 `date`이며 KST 기준 `YYYY-MM-DD`로 받는다. 이 API는 공통 기간 필터의 `instant` 규칙에 대한 예외다. 사용자 목록 E01에는 날짜 검색 필터를 추가하지 않는다.
+
+- 입력한 시작일과 종료일을 모두 포함한다. 같은 날짜로 검색할 수 있으며 `from > to`는 거절한다.
+- 검색 경계는 KST 시작일 00:00 이상, 종료일 **다음 날** 00:00 미만이다. UTC 시각으로 변환해 이벤트 모집 기간 `[startsAt, endsAt)`과 겹치는 이벤트를 조회한다.
+- `from`만 있으면 해당 날짜 00:00 이후까지 모집하는 이벤트(`endsAt > 검색 시작 경계`), `to`만 있으면 종료일 다음 날 00:00 전에 모집을 시작한 이벤트(`startsAt < 검색 종료 경계`)를 포함한다. 두 값을 모두 생략하면 기간으로 제한하지 않는다.
+- 날짜 형식 오류·존재하지 않는 날짜·역전된 범위 등 잘못된 검색 입력은 400으로 거절한다.
+
+예를 들어 `from=2026-10-10&to=2026-10-23`은 KST `[2026-10-10T00:00:00+09:00, 2026-10-24T00:00:00+09:00)`, UTC `[2026-10-09T15:00:00Z, 2026-10-23T15:00:00Z)`와 겹치는 모집 기간을 검색한다. 모집 시작일이 10월 10일 전이어도 해당 기간과 겹치면 포함한다.
 
 ## 이벤트·경품 동시 등록 및 수정
 
 | `EventWriteRequest` 필드 | 타입 | 필수 | 제약 |
 | --- | --- | --- | --- |
 | title | string | 필수 | 1~200자 |
-| description | string | 필수 | 공백만 입력 불가 제안 |
+| description | string | 필수 | 공백만 입력 불가, UTF-8 최대 65,535바이트 |
 | imageKey | string/null | 선택 | 최대 500자, 이미지 처리 방식은 담당 기능 계약에 따름 |
 | eventType | NO_TICKET/TICKET | 필수 | 이벤트 유형 |
 | weightingEnabled | boolean | 필수 | NO_TICKET은 false |
@@ -50,7 +61,9 @@ AE06·AE07은 이벤트 일시 중단·재개 기능 제외에 따라 사용하�
 | startsAt / endsAt | instant | 필수 | 종료 > 시작, 명시적 오프셋 |
 | prizes | PrizeWrite[] | 필수 | 비어 있지 않음, 등수 중복 금지 |
 
-`PrizeWrite`: 선택 `id:UUID`(수정 시 기존 경품), 필수 `rank:int(≥1)`, `name:string(1~200)`, `winnerCount:int(≥1)`, 선택 `description:string/null`, `imageKey:string/null(≤500)`.
+`PrizeWrite`: 선택 `id:UUID`(수정 시 기존 경품), 필수 `rank:int(≥1)`, `name:string(1~200)`, `winnerCount:int(≥1)`, 선택 `description:string/null`(UTF-8 최대 65,535바이트), `imageKey:string/null(≤500)`.
+
+이벤트 설명과 각 경품 설명의 상한은 등록·수정에 동일하게 적용한다. 글자 수가 아닌 UTF-8 인코딩 후 바이트 수를 각각 검사하며 초과 값을 잘라 저장하지 않는다. 이벤트 설명 초과는 400 `EVENT-001`, 경품 설명 초과는 400 `EVENT-004`로 거절한다. 경품 설명은 생략하거나 `null`로 보낼 수 있다.
 
 ```json
 {
@@ -94,10 +107,12 @@ PUT은 수정 가능한 설정 전체를 전달한다. 기존 경품은 ID를 �
 
 ## 상태 운영
 
-`ReasonRequest`: 필수 `reason:string`, 공백만 입력 불가. `EventOperationResult`: `eventId:UUID`, `previousStatus:EventStatus`, `status:EventStatus`, `refundedTicketCount:long`, `processedAt:instant`.
+`ReasonRequest`: 필수 `reason:string`, 공백만 입력 불가, UTF-8 최대 65,535바이트. 바이트 상한 초과는 400 `EVENT-016`으로 거절하며 값을 잘라 저장하지 않는다. `EventOperationResult`: `eventId:UUID`, `previousStatus:EventStatus`, `status:EventStatus`, `refundedTicketCount:long`, `processedAt:instant`.
 
 | 작업 | 처리 계약 |
 | --- | --- |
-| 취소 | 상태와 관계없이 허용. 당첨 발표 이후·대상 없는 종료 상태 포함. 취소와 대상 차감분 반환이 함께 완료되어야 200 |
+| 취소 | 이미 취소된 `CANCELED`를 제외한 상태에서 허용. 당첨 발표 이후·대상 없는 종료 상태 포함. 취소와 대상 차감분 반환이 함께 완료되어야 200 |
+
+유효한 취소 요청을 이미 `CANCELED`인 이벤트에 다시 보내면 409 `EVENT-017`(`ALREADY_CANCELED`, 이미 취소된 이벤트)로 거절한다. 기존 `canceledAt`·`updatedAt`을 변경하지 않고 응모권 반환·취소 알림·감사 기록도 추가하지 않는다. 이미 취소된 이벤트의 성공 결과를 200으로 재전달하는 방식은 사용하지 않는다.
 
 AE08을 반환 작업 접수만 한 202로 완료 처리하지 않는다. 실패는 취소/반환 모두 완료된 것으로 응답하지 않고 같은 원본 차감에 중복 반환하지 않는다. 성공 응답의 반환 수량은 취소 처리의 확정 결과로 제안한다.
