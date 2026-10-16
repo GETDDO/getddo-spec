@@ -40,6 +40,8 @@
 
 ## 기록 목록
 
+- [2026-10-16 타꼬런 FE·BE 계약 정렬](2026-10-16-takko-run-contract-alignment.md) — 검토 대기
+
 - [2026-10-16 이벤트 검색·입력 상한·취소 재요청 계약 최신화](2026-10-16-event-query-validation-contract.md) — 검토 대기
 
 - [2026-10-16 사용자 문맥 오류와 내 정보 비활성 거절 명세 정렬](2026-10-16-user-context-errors.md) — 검토 대기
