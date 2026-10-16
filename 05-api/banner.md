@@ -27,7 +27,7 @@ Banner: id:UUID,eventId:UUID,imageUrl:string,displayOrder:int. 삭제·취소 �
 | AB04 | DELETE /admin/banners/{bannerId} | 없음 | 200 null |
 | AB05 | PUT /admin/banners/order | bannerIds:UUID[] 전체 목록 | 200 AdminBanner[] |
 
-BannerWrite: 필수 eventId:UUID,imageKey:string(앞뒤 공백 제거 후1~500자),displayOrder:int. AdminBanner: Banner 전체+imageKey:string,createdAt:instant,updatedAt:instant. createdBy는 반환하지 않는다. 목록은 숨김 배너를 포함하며1~N 순서다.
+BannerWrite: 필수 eventId:UUID,imageKey:string(앞뒤 공백 제거 후1~500자),displayOrder:int. AdminBanner: Banner 전체+imageKey:string,createdAt:instant,updatedAt:instant. 단, 아래 이전 데이터 예외에 해당하는 관리자 응답의 eventId는 null일 수 있다. createdBy는 반환하지 않는다. 목록은 숨김 배너를 포함하며1~N 순서다.
 
 - 등록 순서는 현재 N개에서1~N+1, N=5이면 거절한다. 사이에 삽입하면 뒤로 민다. 숨김도 전체5개에 포함한다.
 - 수정 순서는1~N이며 사이의 배너를 함께 이동한다. 삭제하면 빈자리를 당긴다.
@@ -54,3 +54,12 @@ BannerWrite: 필수 eventId:UUID,imageKey:string(앞뒤 공백 제거 후1~500�
 ## 배포·담당자 후속
 
 기존 URL 행의 유무·연결을 확인하고 기존 데이터는 보존한다. 새 eventId 모델만 보고 기존 행에 임의 UUID를 채우거나 삭제하지 않는다. 실제 DB 이전과 동시성 저장 방식은 BE에서 별도 검증한다. FE의0기반 순서·목 자동 삭제·API 접두사·실제 이미지 연결은 후속 조정 대상이다. 이미지 업로드·실제 FE·배포 확인은 API 코드 구현과 구분한다.
+
+## 이전 URL 배너 보존 — 2026-10-16 사용자 선택
+
+- 변경 전: 기존 URL 행의 존재 여부와 이벤트 ID 연결 이전 방식은 미확정이었다.
+- 변경 후: 기존 행·URL·이미지 키·생성/수정 시각을 보존하고 eventId를 선택값으로 추가한다. URL에서 이벤트 ID를 추측해 채우지 않는다.
+- 이벤트가 미연결인 이전 배너는 사용자 B01에서 숨기고 관리자 AB01에는 `eventId=null`로 포함한다. 사용자 Banner 응답의 eventId는 계속 필수다.
+- 새 등록·수정의 eventId는 계속 필수이며 이벤트 존재·미삭제·취소 여부 검증을 적용한다. 관리자는 수정으로 올바른 이벤트를 연결하거나 삭제할 수 있다.
+- 미연결 이전 배너도 최대 5개에 포함한다. 이전 행의 기존 순서 값은 마이그레이션에서 덮어쓰지 않고, 이후 관리 변경 시 상대 순서를 바탕으로 1~N으로 정리한다.
+- DB 마이그레이션·실제 이미지 저장소·FE 연결의 성공은 별도 확인한다. 사용자 선택을 실제 운영 데이터 조사·배포 완료로 표시하지 않는다.
