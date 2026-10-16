@@ -11,7 +11,7 @@
 | [사용자](user.md) | U01, AO01~AO02 | 내 정보·관리자 사용자 조회 |
 | [이벤트](event.md) | E01~E02, AE01~AE05, AE08 | 이벤트 조회·등록·취소 |
 | [응모](entry.md) | E03~E07, AO06~AO07 | 응모·자격·응모 이력 |
-| [추첨·결과](drawing.md) | E08~E09, AD01~AD09 | 공개 결과·재추첨·명단 갱신 |
+| [추첨·결과](drawing.md) | E08~E09, AD01~AD09, 추가 업무 ID 미배정 경로 4개 | 공개 결과·추첨/재추첨·실패/실행 이력·최초 발표(PR 병합 후 적용) |
 | [출석](attendance.md) | AT01~AT03, AP01~AP04 | 출석·단계 보상·운영 정책 |
 | [미션](mission.md) | M01~M04, AM01~AM03 | 미션 제출·운영 |
 | [게임](game.md) | G01~G05, AG01~AG03 | 플레이·점수·게임 운영 |
@@ -19,6 +19,6 @@
 | [어뷰징](abuse.md) | AR01~AR02, AR07 (AR03 제외, AR06 후속 검토, AR04·AR05 제외) | 차단 내역 조회·사후 무효화 후속 |
 | [알림](notification.md) | N01~N03, AN01~AN05 | 사용자 알림·관리자 발송 이력 |
 | [배너](banner.md) | B01, AB01~AB05 | 배너 조회·관리 |
-| [감사 기록](audit.md) | 외부 API 없음 | 내부 기록 유지·공통 조회 제외 |
+| [감사 — 원격 확정 명세](https://github.com/Uplus-GETDDO/getddo-spec/blob/32e105545a389fffdc843bf1d11f8d7129163a14/05-api/audit.md) | AU01~AU02 제외 | 내부 감사 기록 유지·공통 조회 제외. 추첨 업무별 실행 이력은 추첨 계약 참조 |
 
 DB 대응, 저장 방식, 내부 처리와 구현 검증 항목은 [백엔드 API 문서](https://github.com/GETDDO/getddo-be/tree/dev/docs/02-api)와 [DB 문서](https://github.com/GETDDO/getddo-be/tree/dev/docs/03-database)에서 관리한다. 담당자 판단이 필요한 도메인 정책은 [미결정 사항](../00-requirements/pending-decisions.md)을 따른다.
