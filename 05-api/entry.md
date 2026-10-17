@@ -1,6 +1,6 @@
 # 응모 API
 
-- 상태: 사용자 API(E03~E07) 구현 반영, 관리자 조회(AO06·AO07) 미구현. 정책 변경 검토 완료 (2026-10-11)
+- 상태: 사용자 API(E03~E07) 구현 반영, 관리자 조회(AO06·AO07) 구현(백엔드 GD-218). 정책 변경 검토 완료 (2026-10-11)
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [응모 규칙](../02-domain/entry.md)
 
@@ -63,6 +63,8 @@
 | --- | --- |
 | `AdminEntry` | EntryReceipt 전체 + `userId:UUID`, `participantId:UUID?` |
 | `AdminParticipant` | `id:UUID`, `eventId:UUID`, `userId:UUID`, `usedTicketCount:long`, `createdAt:instant` |
+
+**현행 구현 범위(백엔드 GD-218)**: 두 경로는 활성 관리자만 호출할 수 있고 아니면 403 `ENTRY-010`(`ADMIN_REQUIRED`)이다. AO06은 접수와 거절 이력을 모두 `createdAt`(`requestedAt`) 내림차순, 같으면 `id` 내림차순으로 돌려주며 `from`·`to`는 E06과 같이 `[from, to)`다. 거절 건의 `participantId`는 `null`이다. AO07은 최초 응모 시각 내림차순, 같으면 `id` 내림차순이고, 없는 이벤트는 404 `ENTRY-004`이며 삭제된 이벤트의 응모자는 조회할 수 있다. `size`는 1~100이다.
 
 ## 2026-10-11 추첨 제외 폐지
 
