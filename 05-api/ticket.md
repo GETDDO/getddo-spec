@@ -15,9 +15,9 @@
 
 | DTO | 필드 |
 | --- | --- |
-| `MyTickets` | `availableCount:long`, `countByGrade:{BRONZE,SILVER,GOLD:long}`, `holdings:TicketHolding[]`, `serverTime:instant` |
-| `TicketHolding` | `grade:BRONZE/SILVER/GOLD`, `expiresAt:instant`, `count:long` |
-| `TicketHistory` | `id:UUID`, `ticketId:UUID`, `operationType:GRANT/USE/REFUND/EXPIRE/CORRECTION`, `grade:BRONZE/SILVER/GOLD`, `status:AVAILABLE/RETURNED/SPENT/EXPIRED`, `expiresAt:instant`, `reason:string`, `createdAt:instant`, `eventId:UUID?`, `eventEntryId:UUID?`, `missionId:UUID?`, `gameId:UUID?`, `attendanceDate:date?`, `originalUseHistoryId:UUID?`, `correctedHistoryId:UUID?` |
+| `MyTickets` | `availableCount:long`, `countByGrade:{BRONZE,SILVER,GOLD,PLATINUM:long}`, `holdings:TicketHolding[]`, `serverTime:instant` |
+| `TicketHolding` | `grade:BRONZE/SILVER/GOLD/PLATINUM`, `expiresAt:instant`, `count:long` |
+| `TicketHistory` | `id:UUID`, `ticketId:UUID`, `operationType:GRANT/USE/REFUND/EXPIRE/CORRECTION`, `grade:BRONZE/SILVER/GOLD/PLATINUM`, `status:AVAILABLE/RETURNED/SPENT/EXPIRED`, `expiresAt:instant`, `reason:string`, `createdAt:instant`, `eventId:UUID?`, `eventEntryId:UUID?`, `missionId:UUID?`, `gameId:UUID?`, `attendanceDate:date?`, `originalUseHistoryId:UUID?`, `correctedHistoryId:UUID?` |
 
 응모권은 한 장이 한 행이다. `TicketHistory`는 응모권 한 장의 처리 한 번이며 수량 필드는 없다. 한 응모에 응모권 여러 장을 쓰면 장마다 `USE` 이력이 생기고 같은 `eventEntryId`를 가진다. `status`·`expiresAt`은 그 처리가 끝난 직후의 값이다. `originalUseHistoryId`는 `REFUND`가 되돌리는 원본 `USE` 이력, `correctedHistoryId`는 `CORRECTION`이 정정하는 과거 이력이다. `CORRECTION`은 이력 유형을 표현하며 임의 수량 수정 API를 제공한다는 뜻이 아니다.
 
@@ -43,11 +43,11 @@ T02는 `createdAt DESC, id DESC` 순서의 커서 페이지다. `from`·`to`는 
 
 | DTO | 필드 |
 | --- | --- |
-| `TicketGrant` | `historyId:UUID`, `ticketId:UUID`, `userId:UUID`, `userName:string`, `grade:BRONZE/SILVER/GOLD`, `sourceType:ATTENDANCE/MISSION/GAME`, `sourceId:UUID`, `missionId:UUID?`, `grantedAt:instant`, `expiresAt:instant` |
+| `TicketGrant` | `historyId:UUID`, `ticketId:UUID`, `userId:UUID`, `userName:string`, `grade:BRONZE/SILVER/GOLD/PLATINUM`, `sourceType:ATTENDANCE/MISSION/GAME`, `sourceId:UUID`, `missionId:UUID?`, `grantedAt:instant`, `expiresAt:instant` |
 | `AdminTicketHistory` | TicketHistory 전체 + `userId:UUID`, `userName:string`, `eventTitle:string?`, `missionTitle:string?` |
 | `TicketConsistency` | `userId:UUID`, `availableCount:long`, `isConsistent:boolean`, `inconsistencies:{ticketId:UUID,ticketVersion:long,latestHistoryVersion:long,ticketStatus:AVAILABLE/RETURNED/SPENT/EXPIRED,latestHistoryStatus:AVAILABLE/RETURNED/SPENT/EXPIRED?}[]`, `checkedAt:instant` |
-| `TicketRefund` | `id:UUID`, `spendHistoryId:UUID`, `ticketId:UUID`, `grade:BRONZE/SILVER/GOLD`, `eventId:UUID`, `eventTitle:string`, `userId:UUID`, `userName:string`, `reasonType:EVENT_CANCELED`, `refundedAt:instant`, `targetExpiresAt:instant?` |
-| `TicketInconsistency` | `ticketId:UUID`, `userId:UUID`, `userName:string`, `grade:BRONZE/SILVER/GOLD`, `ticketVersion:long`, `latestHistoryVersion:long`, `ticketStatus:AVAILABLE/RETURNED/SPENT/EXPIRED`, `latestHistoryStatus:AVAILABLE/RETURNED/SPENT/EXPIRED?`, `checkedAt:instant` |
+| `TicketRefund` | `id:UUID`, `spendHistoryId:UUID`, `ticketId:UUID`, `grade:BRONZE/SILVER/GOLD/PLATINUM`, `eventId:UUID`, `eventTitle:string`, `userId:UUID`, `userName:string`, `reasonType:EVENT_CANCELED`, `refundedAt:instant`, `targetExpiresAt:instant?` |
+| `TicketInconsistency` | `ticketId:UUID`, `userId:UUID`, `userName:string`, `grade:BRONZE/SILVER/GOLD/PLATINUM`, `ticketVersion:long`, `latestHistoryVersion:long`, `ticketStatus:AVAILABLE/RETURNED/SPENT/EXPIRED`, `latestHistoryStatus:AVAILABLE/RETURNED/SPENT/EXPIRED?`, `checkedAt:instant` |
 
 `keyword`는 사용자 이름 부분 일치 검색(대소문자 무시)이고 정확한 사용자 ID는 `userId`로 필터링한다. AO03의 `missionId`를 쓰면 `sourceType`이 `MISSION`인 행만 나온다. AO03의 `sourceId`는 출석 기록 ID(`ATTENDANCE`)·미션 제출 ID(`MISSION`)·게임 플레이 ID(`GAME`)로 산출한다. `from`·`to`는 지급 시각 기준 `[from, to)`다. AO03에는 지급 수 요약 필드를 두지 않고 지급 수는 `totalElements`로 읽는다. 응모권 지급 이력과 현재 상태의 정합성 확인을 함께 제공한다. `isConsistent`는 같은 기준 시점에 응모권의 현재 버전·상태와 마지막 이력의 버전·상태를 비교한 결과여야 하며 단순히 항상 true로 반환하지 않는다. 불일치한 응모권만 `inconsistencies`에 담고, 없으면 `isConsistent`가 true다. AO04는 존재하지 않는 `userId`면 404 `TICKET-011`을 돌려준다. 관리자 조회는 활성 관리자만 호출할 수 있고 아니면 403 `TICKET-010`이다. "어긋남"은 응모권의 현재 버전·상태가 마지막(버전이 가장 큰) 이력과 다르거나 이력이 하나도 없는 경우이며, 이력이 없으면 `latestHistoryVersion`은 0, `latestHistoryStatus`는 null이다. AO09는 전체 사용자의 불일치 응모권을 요청 시점에 계산해 페이지로 돌려주며 `userId`로 좁힐 수 있다. `TicketGrant`는 응모권 한 장의 지급 이력이므로 한 번의 보상으로 여러 장을 지급하면 장수만큼 행이 나온다. AO03~AO09는 읽기 전용 관리자 조회이며 감사 기록 대상이 아니다.
 
@@ -70,3 +70,7 @@ AO08은 처리 이력 조회다. 이를 근거로 이벤트 취소 완료 후 �
 ## 2026-10-12 개별 당첨 취소와 반환 구분
 
 개별 당첨 취소·빈 자리 재추첨을 이유로 응모권을 반환하거나 회수하지 않는다. AO08의 반환 이력 조회에 당첨 취소에 따른 신규 반환 이력을 추가하지 않는다. 이벤트 취소 반환과 과거 이력 호환성은 기존 계약을 따른다. 기준은 [응모권 규칙](../02-domain/ticket.md#2026-10-12-당첨-취소와-응모권)이다.
+
+## 2026-10-17 플래티넘 등급 계약 반영
+
+위 등급 목록에는 플래티넘(`PLATINUM`) 추가 정책을 반영했다. 플래티넘 지원의 서비스 적용 시점과 구현·프론트엔드 연동 검증은 후속 사항이며, 기존의 구현 반영 표기를 플래티넘 지원 완료로 해석하지 않는다. 확률·가중치는 [응모권 규칙](../02-domain/ticket.md#게임미션-보상의-등급-추첨), 전환 후속은 [등급 응모권 후속 사항](../00-requirements/pending-decisions.md#등급-응모권)을 따른다.

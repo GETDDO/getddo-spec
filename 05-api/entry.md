@@ -27,7 +27,7 @@
 
 ## 응모 요청·응답
 
-`EntryRequest`의 유일한 필드는 `tickets`다. 사용자가 쓸 응모권의 등급별 장수를 담은 맵이며 키는 `BRONZE`·`SILVER`·`GOLD`, 값은 0 이상의 정수다. 없는 등급은 0으로 본다. 요청 합계는 서버가 계산하고 별도의 합계 필드는 받지 않는다. 등급별 장수는 보유 조회 T01의 `countByGrade`에서 고르며 그 등급의 현재 사용 가능한 장수를 넘을 수 없다. 같은 등급 안에서는 만료가 이른 응모권부터 차감한다.
+`EntryRequest`의 유일한 필드는 `tickets`다. 사용자가 쓸 응모권의 등급별 장수를 담은 맵이며 키는 `BRONZE`·`SILVER`·`GOLD`·`PLATINUM`, 값은 0 이상의 정수다. 없는 등급은 0으로 본다. 요청 합계는 서버가 계산하고 별도의 합계 필드는 받지 않는다. 등급별 장수는 보유 조회 T01의 `countByGrade`에서 고르며 그 등급의 현재 사용 가능한 장수를 넘을 수 없다. 같은 등급 안에서는 만료가 이른 응모권부터 차감한다.
 
 | 이벤트 | 허용 요청 | 서버 검증 |
 | --- | --- | --- |
@@ -42,7 +42,7 @@
 
 가중치 미적용 이벤트는 등급이 추첨에 쓰이지 않으므로 비싼 등급을 실수로 쓰지 않도록 브론즈 응모권만 쓸 수 있다. 이 이벤트에 응모하려면 사용 가능한 브론즈가 1장 이상이어야 하며, 브론즈가 없는 사용자는 다른 등급이 있어도 응모할 수 없다. 이 경우는 일반 보유량 부족과 구분되는 안내(브론즈 응모권이 필요하다는 메시지)를 반환한다.
 
-`EntryReceipt`: `id:UUID`, `eventId:UUID`, `eventTitle:string`, `requestedTicketCount:int`, `requestedTicketsByGrade:{BRONZE,SILVER,GOLD:int}`, `deductedTicketCount:int`, `deductedTicketsByGrade:{BRONZE,SILVER,GOLD:int}`, `status:ACCEPTED/REJECTED`, `requestedAt:instant`, `acceptedAt:instant?`, `rejectionCode:string?`, `rejectionReason:string?`.
+`EntryReceipt`: `id:UUID`, `eventId:UUID`, `eventTitle:string`, `requestedTicketCount:int`, `requestedTicketsByGrade:{BRONZE,SILVER,GOLD,PLATINUM:int}`, `deductedTicketCount:int`, `deductedTicketsByGrade:{BRONZE,SILVER,GOLD,PLATINUM:int}`, `status:ACCEPTED/REJECTED`, `requestedAt:instant`, `acceptedAt:instant?`, `rejectionCode:string?`, `rejectionReason:string?`.
 
 `requestedTicketCount`와 `deductedTicketCount`는 등급별 장수의 합계이며, 등급별 맵은 장수가 0인 등급도 포함한다. 거절 건의 `deductedTicketsByGrade`는 모두 0이다. 같은 멱등 키로 등급별 장수가 다른 요청이 오면 409로 거절한다.
 
@@ -73,3 +73,7 @@
 ## 2026-10-11 추첨 제외 폐지
 
 관리자 참여 허용·추첨 제외 결정은 제공하지 않는다. AO07의 신규 필터·DTO에 제외 상태·사유·시각을 포함하지 않는다. 정상 접수된 유효 응모를 차단 기록으로 추첨에서 제외하지 않는다. 기존 데이터에 제외 정보가 있는 경우의 조회 호환성은 구현 전 담당자와 확인하며 저장 이력을 삭제하지 않는다.
+
+## 2026-10-17 플래티넘 등급 계약 반영
+
+위 등급 목록에는 플래티넘(`PLATINUM`) 추가 정책을 반영했다. 플래티넘 지원의 서비스 적용 시점과 구현·프론트엔드 연동 검증은 후속 사항이며, 기존의 구현 반영 표기를 플래티넘 지원 완료로 해석하지 않는다. 확률·가중치는 [응모권 규칙](../02-domain/ticket.md#게임미션-보상의-등급-추첨), 전환 후속은 [등급 응모권 후속 사항](../00-requirements/pending-decisions.md#등급-응모권)을 따른다.
