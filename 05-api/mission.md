@@ -1,6 +1,6 @@
 # 미션 API
 
-- 상태: 사용자 API(M01~M04) 구현 반영, 관리자 미션(AM01~AM03) 미구현 (2026-10-17 현행 구현 기준으로 정정)
+- 상태: 사용자 API(M01~M04) 구현 반영, 관리자 미션(AM01~AM03) 구현(백엔드 GD-177)
 - 공통 계약: [공통 API 계약](common.md)
 - 도메인 규칙: [미션 규칙](../02-domain/mission.md)
 
@@ -92,7 +92,7 @@
 
 `AdminMission`: `id:UUID`, MissionWrite 전체, `status:DRAFT/ACTIVE/ENDED`, `rewardPolicyId:UUID`, `createdBy:UUID`, `createdAt:instant`, `updatedAt:instant`; `questions`와 `options`에는 각각 생성된 `id:UUID`를 추가한다.
 
-**구현 전 확인 필요(현행 코드·DB 기준)**: ① 현재 DB는 미션 상태를 `ACTIVE`/`ENDED`만 저장하므로 `AdminMission.status`의 `DRAFT`는 구현할 때 상태 모델과 함께 정해야 한다. ② 미션 완료 보상은 등급 응모권 1장으로 고정이라(도메인 규칙) `MissionWrite.rewardTicketCount`는 구현할 때 계약을 조정해야 한다.
+**현행 구현 범위(백엔드 GD-177)**: 세 경로는 활성 관리자만 호출할 수 있고 아니면 403 `MISSION-006`이다. 미션 상태는 `ACTIVE`/`ENDED`뿐이며 `DRAFT`는 없다. AM03으로 등록한 미션은 바로 `ACTIVE`이고 제출 가능 기간은 `startsAt`·`endsAt`이 정한다. 미션 완료 보상은 등급 응모권 1장으로 고정이라 `rewardTicketCount`는 요청에서 생략하거나 1만 보낼 수 있고(다른 값은 400 `MISSION-001`) 응답 값은 항상 1이며, 서버가 미션마다 수량 1의 보상 정책을 만들어 `rewardPolicyId`로 연결한다. AM01은 운영 시작 시각 내림차순(같으면 `id` 내림차순)이고 `from`·`to`는 `startsAt`이 `[from, to)`인 미션을 거르며, 목록의 `AdminMission`에는 `questions`가 없다. 퀴즈 문항에는 `required`가, 설문 문항에는 `correctAnswer`·`isCorrect`가 없다. 선택형 퀴즈(OX·단일 선택)는 선택지 2개 이상에 정답이 정확히 하나여야 하고 어기면 400 `MISSION-001`이다. 필수값 누락·길이 초과는 400 `COMMON-002`다. 없는 미션은 404 `MISSION-003`이다. 등록은 감사 기록(`MISSION_CREATE`)을 남긴다.
 
 운영 중인 미션의 문항·조건·보상은 수정하지 않는다. 변경은 새 미션 AM03으로 등록한다. 시작 전 초안 수정·공개·종료·삭제의 허용 범위와 요청 계약은 **미션 상태 운영 계약**에 따른다.
 
